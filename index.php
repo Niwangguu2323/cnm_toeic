@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="utf-8">
-    <title>Hệ thống hỗ trợ luyện thi TOEIC 2 kỹ năngnăng</title>
+    <title>Hệ thống hỗ trợ luyện thi TOEIC 2 kỹ năng</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -72,7 +72,7 @@
     <div class="container-fluid p-0 mb-5">
         <div class="owl-carousel header-carousel position-relative">
             <div class="owl-carousel-item position-relative" style="height: 100vh; min-height: 600px;">
-                <img class="img-fluid w-100 h-100" src="img/carousel-1.jpg" style="object-fit: cover;" alt="">
+                <img class="img-fluid w-100 h-100" src="public/img/carousel-1.jpg" style="object-fit: cover;" alt="">
                 <div class="position-absolute top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-start" style="background: rgba(24, 29, 56, .7);">
                     <div class="container">
                         <div class="row justify-content-start">
