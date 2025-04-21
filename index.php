@@ -60,7 +60,7 @@
                         <a href="#" class="dropdown-item">Đọc</a>
                     </div>
                 </div>
-                <a href="templates/contact.php" class="nav-item nav-link">Làm bài thi</a>
+                <a href="#" class="nav-item nav-link">Làm bài thi</a>
             </div>
             <a href="" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Đăng nhập<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
@@ -166,7 +166,7 @@
                             <p class="mb-0"><i class="fa fa-arrow-right text-primary me-2"></i>Liên hệ</p>
                         </div>
                     </div>
-                    <a class="btn btn-primary py-3 px-5 mt-2" href="">Xem thêm</a>
+                    <a class="btn btn-primary py-3 px-5 mt-2" href="templates/about.php">Xem thêm</a>
                 </div>
             </div>
         </div>
