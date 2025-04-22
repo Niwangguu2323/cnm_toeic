@@ -3,12 +3,12 @@
 
 <head>
     <meta charset="utf-8">
-    <title>2N Toeic Lab - Về chúng tôi</title>
+    <title>2N Toeic Lab - Luyện đọc</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
 
-    <!-- Icon IUH - hiển thị trên thanh tác vụ webweb-->
+    <!-- Favicon -->
     <link href="../public/img/logoiuh.png" rel="icon">
 
     <!-- Google Web Fonts -->
@@ -52,12 +52,12 @@
         <div class="collapse navbar-collapse" id="navbarCollapse">
             <div class="navbar-nav ms-auto p-4 p-lg-0">
                 <a href="../index.php" class="nav-item nav-link">Trang chủ</a>
-                <a href="about.php" class="nav-item nav-link active">Về chúng tôi</a>
+                <a href="about.php" class="nav-item nav-link">Về chúng tôi</a>
                 <div class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Luyện tập</a>
+                    <a href="#" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Luyện tập</a>
                     <div class="dropdown-menu fade-down m-0">
                         <a href="listening.php" class="dropdown-item">Nghe</a>
-                        <a href="reading.php" class="dropdown-item">Đọc</a>
+                        <a href="reading.php" class="dropdown-item active">Đọc</a>
                     </div>
                 </div>
                 <a href="test.php" class="nav-item nav-link">Làm bài thi</a>
@@ -68,12 +68,13 @@
     <!-- Navbar End -->
 
 
+
     <!-- Header Start -->
     <div class="container-fluid bg-primary py-5 mb-5 page-header">
         <div class="container py-5">
             <div class="row justify-content-center">
                 <div class="col-lg-10 text-center">
-                    <h1 class="display-3 text-white animated slideInDown">2N Toeic Lab</h1>
+                    <h1 class="display-3 text-white animated slideInDown">Luyện tập đọc</h1>
                 </div>
             </div>
         </div>
@@ -81,34 +82,16 @@
     <!-- Header End -->
 
 
-    <!-- About Start -->
+    <!-- Reading test list Start -->
     <div class="container-xxl py-5">
         <div class="container">
-            <div class="row g-5">
-                <div class="col-lg-4 wow fadeInUp" data-wow-delay="0.1s" style="min-height: 400px;">
-                    <div class="position-relative h-100">
-                        <img class="img-fluid position-absolute w-100 h-100" src="../public/img/about.jpg" alt="" style="object-fit: cover;">
-                    </div>
-                </div>
-                <div class="col-lg-8 wow fadeInUp" data-wow-delay="0.3s">
-                    <h6 class="section-title bg-white text-start text-primary pe-3">Về chúng tôi</h6>
-                    <h1 class="mb-4">2N Toeic Lab - Nhi & Nar Toeic Lab</h1>
-                    <p class="mb-4">Với mong muốn tạo ra một công cụ học tập hiệu quả, dễ tiếp cận và phù hợp với nhu cầu của người học tiếng Anh, đặc biệt là luyện thi TOEIC, Nhi (Hoàng Hạnh Nhi) và Nar (Hồ Quốc Thái) đã xây dựng hệ thống này như một giải pháp hỗ trợ học tập toàn diện. Bắt nguồn từ chính những trải nghiệm của bản thân khi ôn luyện, chúng tôi hiểu rằng việc tìm được nguồn tài liệu chất lượng, phù hợp trình độ và có thể theo dõi tiến độ học tập là điều không hề dễ dàng. Vì vậy, hệ thống không chỉ cung cấp bài luyện tập sát đề thực tế mà còn tạo cảm hứng học tập thông qua giao diện thân thiện và chức năng thông minh.</p>
-                    <div>
-                        <h4 class="text-white mb-3">Liên hệ</h4>
-                        <p class="mb-2"><i class="fa fa-phone-alt me-3"></i>0949 80 4347 (Nhi)</p>
-                        <p class="mb-2"><i class="fa fa-envelope me-3"></i>nhi@student.iuh.edu.vn</p>
-                        <div class="d-flex pt-2">
-                            <a class="btn btn-outline-dark btn-social" href=""><i class="fab fa-facebook-f"></i></a>
-                            <a class="btn btn-outline-dark btn-social" href=""><i class="fab fa-youtube"></i></a>
-                            <a class="btn btn-outline-dark btn-social" href=""><i class="fab fa-instagram"></i></a>
-                        </div>
-                    </div>
-                </div>
+            <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+                <h6 class="section-title bg-white text-center text-primary px-3">Các bài luyện đọc</h6>
             </div>
-        </div>
+        </div> 
     </div>
-    <!-- About End -->
+    <!-- Reading test list end -->
+
 
     <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">

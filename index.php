@@ -54,13 +54,13 @@
                 <a href="index.php" class="nav-item nav-link active">Trang chủ</a>
                 <a href="templates/about.php" class="nav-item nav-link">Về chúng tôi</a>
                 <div class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Luyện tập</a>
+                    <a href="templates/practice.php" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Luyện tập</a>
                     <div class="dropdown-menu fade-down m-0">
-                        <a href="#" class="dropdown-item">Nghe</a>
-                        <a href="#" class="dropdown-item">Đọc</a>
+                        <a href="templates/listening.php" class="dropdown-item">Nghe</a>
+                        <a href="templates/reading.php" class="dropdown-item">Đọc</a>
                     </div>
                 </div>
-                <a href="#" class="nav-item nav-link">Làm bài thi</a>
+                <a href="templates/test.php" class="nav-item nav-link">Làm bài thi</a>
             </div>
             <a href="" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Đăng nhập<i class="fa fa-arrow-right ms-3"></i></a>
         </div>
@@ -80,8 +80,8 @@
                                 <h5 class="text-primary text-uppercase mb-3 animated slideInDown">2N Toeic Lab</h5>
                                 <h1 class="display-3 text-white animated slideInDown">Hệ thống hỗ trợ luyện thi Toeic 2 kỹ năng</h1>
                                 <p class="fs-5 text-white mb-4 pb-2">Ôn luyện thông minh - điểm số vượt trội!</p>
-                                <a href="#" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Về chúng tôi</a>
-                                <a href="templates/about.php" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Đăng ký ngay</a>
+                                <a href="templates/about.php" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Về chúng tôi</a>
+                                <a href="#" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Đăng ký ngay</a>
                             </div>
                         </div>
                     </div>
@@ -178,7 +178,7 @@
         <div class="container">
             <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
                 <h6 class="section-title bg-white text-center text-primary px-3">Các bài thi</h6>
-                <h1 class="mb-5">Các bài thi nổi bật</h1>
+                <h1 class="mb-5">Các bài thi mới nhất</h1>
             </div>
             <div class="row g-4 justify-content-center">
                 <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
@@ -236,7 +236,8 @@
                     <h4 class="text-white mb-3">Menu</h4>
                     <a class="btn btn-link" href="">Trang chủ</a>
                     <a class="btn btn-link" href="">Về chúng tôi</a>
-                    <a class="btn btn-link" href="">Luyện tập kĩ năng</a>
+                    <a class="btn btn-link" href="">Luyện tập kĩ năng nghe</a>
+                    <a class="btn btn-link" href="">Luyện tập kĩ năng đọc</a>
                     <a class="btn btn-link" href="">Làm bài thi</a>
                 </div>
                 <div class="col-lg-3 col-md-6">
