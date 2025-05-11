@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -62,7 +66,19 @@
                 </div>
                 <a href="test.php" class="nav-item nav-link active">Làm bài thi</a>
             </div>
-            <a href="login.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Đăng nhập<i class="fa fa-arrow-right ms-3"></i></a>
+            <?php if (isset($_SESSION["user_email"])): ?>
+                <div class="nav-item dropdown me-4">
+                    <a href="#" class="btn btn-primary dropdown-toggle py-4 px-lg-5 d-none d-lg-block" data-bs-toggle="dropdown">
+                        <?= explode('@', $_SESSION["user_email"])[0] ?>
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-end">
+                        <a href="profile.php" class="dropdown-item">Sửa thông tin</a>
+                        <a href="logout.php" class="dropdown-item text-danger">Đăng xuất</a>
+                    </div>
+                </div>
+            <?php else: ?>
+                <a href="login.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Đăng nhập<i class="fa fa-arrow-right ms-3"></i></a>
+            <?php endif; ?>
         </div>
     </nav>
     <!-- Navbar End -->

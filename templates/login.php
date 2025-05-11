@@ -1,3 +1,23 @@
+<?php
+session_start();
+
+$correct_email = "nhivanar@gmail.com";
+$correct_password = "nhivanar";
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $email = $_POST["txt_email"] ?? '';
+    $password = $_POST["password"] ?? '';
+
+    if ($email === $correct_email && $password === $correct_password) {
+        $_SESSION["user_email"] = $email;
+        header("Location: ../index.php");
+        exit;
+    } else {
+        $error = "Email hoặc mật khẩu không đúng";
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
