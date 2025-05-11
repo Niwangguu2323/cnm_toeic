@@ -79,6 +79,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="row justify-content-center">
                 <div class="col-lg-10 text-center">
                     <h1 class="display-3 text-white animated slideInDown">Đăng nhập</h1>
+                    <?php if (isset($error)): ?>
+                        <div class="alert alert-danger text-center"><?= $error ?></div>
+                    <?php endif; ?>
                     <form action="" method="POST" class="col-5 mx-auto" autocomplete="off">
                             <input type="text" style="display:none">
                             <input type="password" style="display:none">
