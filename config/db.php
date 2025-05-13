@@ -1,0 +1,15 @@
+<?php
+class toeic {
+    public function ketnoi() {
+        $conn = mysqli_connect('localhost', 'root', '');
+        if (!$conn) {
+            echo "Kết nối thất bại";
+            return null;
+        } else {
+            mysqli_select_db($conn, "toeicdb");
+            mysqli_query($conn, "SET NAMES 'utf8'");
+            return $conn;
+        }
+    }
+}
+?>
