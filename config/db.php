@@ -3,7 +3,7 @@ class toeic {
     public function ketnoi() {
         $conn = mysqli_connect('localhost', 'root', '');
         if (!$conn) {
-            echo "Kết nối thất bại";
+            echo "Kết nối dữ liệu thất bại";
             return null;
         } else {
             mysqli_select_db($conn, "toeicdb");
