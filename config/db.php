@@ -1,6 +1,6 @@
 <?php
-class toeic {
-    public function ketnoi() {
+class ketnoi {
+    public function moketnoi() {
         $conn = mysqli_connect('localhost', 'root', '');
         if (!$conn) {
             echo "Kết nối dữ liệu thất bại";

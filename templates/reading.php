@@ -1,5 +1,13 @@
 <?php
 session_start();
+
+?>
+
+<?php
+require_once __DIR__ . '/../models/ExamModel.php';
+
+$model = new ExamModel();
+$exams = $model->getAllReadingExams();
 ?>
 
 <!DOCTYPE html>
@@ -111,6 +119,37 @@ session_start();
             <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
                 <h6 class="section-title bg-white text-center text-primary px-3">Các bài luyện đọc</h6>
             </div>
+            <div class="container">
+        <div class="row g-4 justify-content-center">
+            <?php if (!empty($exams)): ?>
+                <?php foreach ($exams as $index => $exam): ?>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="<?= 0.1 * ($index + 1) ?>s">
+                        <div class="course-item bg-light">
+                            <div class="text-center p-4 pb-0">
+                                <h3 class="mb-0"><?= htmlspecialchars($exam['title']) ?></h3>
+                            </div>
+                            <div class="d-flex border-top">
+                                <small class="flex-fill text-center border-end py-2">
+                                    <i class="fa fa-user-tie text-primary me-2"></i>Năm 2025
+                                </small>
+                                <small class="flex-fill text-center border-end py-2">
+                                    <i class="fa fa-clock text-primary me-2"></i><?= $exam['duration_minutes'] ?> phút
+                                </small>
+                            </div>
+                            <div class="text-center p-4 pb-0">
+                                <a class="btn btn-primary mb-3 w-100" href="index.php?page=chitietbaithi&id=<?= $exam['exam_id'] ?>">
+    Xem chi tiết bài thi
+</a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="text-center">Không có bài thi nào trong hệ thống.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+
         </div> 
     </div>
     <!-- Reading test list end -->
@@ -176,7 +215,8 @@ session_start();
     <script src="lib/easing/easing.min.js"></script>
     <script src="lib/waypoints/waypoints.min.js"></script>
     <script src="lib/owlcarousel/owl.carousel.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/wowjs@1.1.3/dist/wow.min.js"></script>
+    <script> new WOW().init(); </script>
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
 </body>

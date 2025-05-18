@@ -5,8 +5,8 @@ class ExamModel {
     private $conn;
 
     public function __construct() {
-        $db = new toeic();
-        $this->conn = $db->ketnoi();
+        $db = new ketnoi();
+        $this->conn = $db->moketnoi();
     }
 
     public function xuatDuLieu($sql) {
@@ -27,4 +27,53 @@ class ExamModel {
         echo json_encode($data);
     }
 
+    public function getAllExams() {
+    $sql = "SELECT exam_id, title, type, duration_minutes, difficulty_level FROM exam";
+    $result = mysqli_query($this->conn, $sql);
+
+    if (!$result) {
+        die("Lỗi truy vấn: " . mysqli_error($this->conn));
+    }
+
+    $data = [];
+    while ($row = mysqli_fetch_assoc($result)) {
+        $data[] = $row;
+    }
+
+    return $data;
+}
+    public function getAllReadingExams() {
+        $sql = "SELECT exam_id, title, type, duration_minutes, difficulty_level 
+                FROM exam 
+                WHERE type = 'Reading'";
+        $result = mysqli_query($this->conn, $sql);
+
+        if (!$result) {
+            die("Lỗi truy vấn: " . mysqli_error($this->conn));
+        }
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+
+        return $data;
+    }
+    public function getAllListeningExams() {
+        $sql = "SELECT exam_id, title, type, duration_minutes, difficulty_level 
+                FROM exam 
+                WHERE type = 'Listening'";
+        $result = mysqli_query($this->conn, $sql);
+
+        if (!$result) {
+            die("Lỗi truy vấn: " . mysqli_error($this->conn));
+        }
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+
+        return $data;
+    }
 }
