@@ -21,6 +21,31 @@
     z-index: 99;
 }
 
+/* Ẩn submenu ban đầu */
+.dropdown-submenu .submenu {
+    display: none;
+    position: absolute;
+    left: 100%;
+    top: 0;
+    margin-left: 0.1rem;
+    background-color: white;
+    min-width: 180px;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 0.25rem;
+    z-index: 1000;
+}
+
+/* Hiện submenu khi hover vào Admin */
+.dropdown-submenu:hover .submenu {
+    display: block;
+}
+
+/* Tùy chọn: khi hover vào Admin, đổi màu, thêm icon, highlight... */
+.submenu-toggle:hover {
+    font-weight: bold;
+    background-color: #f8f9fa;
+}
+
 
 /*** Spinner ***/
 #spinner {

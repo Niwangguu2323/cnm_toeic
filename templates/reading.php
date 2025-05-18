@@ -74,6 +74,13 @@ session_start();
                     <div class="dropdown-menu dropdown-menu-end">
                         <a href="profile.php" class="dropdown-item">Sửa thông tin</a>
                         <a href="logout.php" class="dropdown-item text-danger">Đăng xuất</a>
+                        <div class="dropdown-submenu">
+                            <a href="#" class="dropdown-item submenu-toggle">Admin</a>
+                            <ul class="submenu">
+                            <li><a href="../admin/exam_manage.php" class="dropdown-item">Quản lý bài thi</a></li>
+                            <li><a href="#" class="dropdown-item">Quản lý người dùng</a></li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
             <?php else: ?>
