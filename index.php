@@ -1,5 +1,10 @@
 <?php
 session_start();
+require_once __DIR__ . '/config/db.php';
+$db = new ketnoi();
+$conn = $db->moketnoi();
+$exam_sql = "SELECT * FROM exam ORDER BY exam_id DESC LIMIT 3";
+$exam_result = mysqli_query($conn, $exam_sql);
 ?>
 
 <!DOCTYPE html>
@@ -204,49 +209,27 @@ session_start();
                 <h1 class="mb-5">Các bài thi mới nhất</h1>
             </div>
             <div class="row g-4 justify-content-center">
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
-                    <div class="course-item bg-light">
-                        <div class="text-center p-4 pb-0">
-                            <h3 class="mb-0">Test 1</h3>
-                        </div>
-                        <div class="d-flex border-top">
-                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-user-tie text-primary me-2"></i>Năm 2023</small>
-                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>2:00 hours</small>
-                        </div>
-                        <div class="text-center p-4 pb-0">
-                            <a class="btn btn-primary mb-0 w-100" href="">Xem chi tiết bài thi</a>
-                        </div>
-                    </div>
+    <?php while ($exam = mysqli_fetch_assoc($exam_result)): ?>
+        <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.1s">
+            <div class="course-item bg-light">
+                <div class="text-center p-4 pb-0">
+                    <h3 class="mb-0"><?= htmlspecialchars($exam['title']) ?></h3>
                 </div>
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.3s">
-                    <div class="course-item bg-light">
-                        <div class="text-center p-4 pb-0">
-                            <h3 class="mb-0">Test 3</h3>
-                        </div>
-                        <div class="d-flex border-top">
-                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-user-tie text-primary me-2"></i>Năm 2023</small>
-                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>2:00 hours</small>
-                        </div>
-                        <div class="text-center p-4 pb-0">
-                            <a class="btn btn-primary mb-0 w-100" href="">Xem chi tiết bài thi</a>
-                        </div>
-                    </div>
+                <div class="d-flex border-top">
+                    <small class="flex-fill text-center border-end py-2">
+                        <i class="fa fa-user-tie text-primary me-2"></i>Năm <?= date('Y') ?>
+                    </small>
+                    <small class="flex-fill text-center border-end py-2">
+                        <i class="fa fa-clock text-primary me-2"></i><?= $exam['duration_minutes'] ?> phút
+                    </small>
                 </div>
-                <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="0.5s">
-                    <div class="course-item bg-light">
-                        <div class="text-center p-4 pb-0">
-                            <h3 class="mb-0">Test 8</h3>
-                        </div>
-                        <div class="d-flex border-top">
-                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-user-tie text-primary me-2"></i>Năm 2023</small>
-                            <small class="flex-fill text-center border-end py-2"><i class="fa fa-clock text-primary me-2"></i>2:00 hours</small>
-                        </div>
-                        <div class="text-center p-4 pb-0">
-                            <a class="btn btn-primary mb-0 w-100" href="">Xem chi tiết bài thi</a>
-                        </div>
-                    </div>
+                <div class="text-center p-4 pb-0">
+                    <a class="btn btn-primary mb-0 w-100" href="templates/chitietbaithi.php?id=<?= $exam['exam_id'] ?>">Xem chi tiết bài thi</a>
                 </div>
             </div>
+        </div>
+    <?php endwhile; ?>
+</div>
         </div>
     </div>
     <!-- Courses End -->
