@@ -2,13 +2,15 @@
 require_once __DIR__ . '/../config/db.php';
 
 class ExamModel {
-    private $conn;
+    public $conn;
 
     public function __construct() {
         $db = new ketnoi();
         $this->conn = $db->moketnoi();
     }
-
+    public function getConn() {
+    return $this->conn;
+}
     public function xuatDuLieu($sql) {
         $result = mysqli_query($this->conn, $sql);
 

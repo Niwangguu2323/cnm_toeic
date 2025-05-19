@@ -1,10 +1,7 @@
 <?php
 session_start();
-if ($page == 'chitietbaithi' && isset($_GET['id'])) {
-    include '../templates/chitietbaithi.php';
-}
-
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 
