@@ -4,9 +4,8 @@ require_once __DIR__ . '/../models/ExamModel.php';
 $model = new ExamModel();
 $exam_id = $_GET['id'] ?? 0;
 
-$conn = $model->getConn(); // Đảm bảo bạn có getConn() trong ExamModel
+$conn = $model->getConn(); // Đảm bảo ExamModel có hàm getConn()
 
-// 1. Lấy thông tin đề thi
 $exam_sql = "SELECT * FROM exam WHERE exam_id = $exam_id";
 $exam_result = mysqli_query($conn, $exam_sql);
 $exam = mysqli_fetch_assoc($exam_result);
@@ -16,7 +15,7 @@ if (!$exam) {
     exit;
 }
 
-// 2. Lấy các đoạn văn nếu là đề đọc
+// Lấy passage nếu là Reading
 $passages = [];
 if ($exam['type'] === 'Reading') {
     $passage_sql = "SELECT * FROM reading_passage WHERE exam_id = $exam_id";
@@ -26,7 +25,7 @@ if ($exam['type'] === 'Reading') {
     }
 }
 
-// 3. Lấy tất cả câu hỏi thuộc đề này
+// Lấy câu hỏi
 $question_sql = "SELECT * FROM exam_question WHERE exam_id = $exam_id ORDER BY passage_id ASC, question_id ASC";
 $question_result = mysqli_query($conn, $question_sql);
 $questions = [];
@@ -34,10 +33,9 @@ while ($row = mysqli_fetch_assoc($question_result)) {
     $questions[] = $row;
 }
 
-// 4. Gom câu hỏi theo passage_id
+// Gom nhóm câu hỏi
 $grouped_questions = [];
 $no_passage_questions = [];
-
 foreach ($questions as $q) {
     if ($q['passage_id']) {
         $grouped_questions[$q['passage_id']][] = $q;
@@ -71,14 +69,16 @@ foreach ($questions as $q) {
         <button type="submit" class="btn btn-primary mb-4 d-none" id="submitExamBtn">📝 Nộp bài</button>
     </form>
 
+    <?php $cauSo = 1; ?>
+
     <?php if ($exam['type'] === 'Reading'): ?>
+
         <?php if (!empty($no_passage_questions)): ?>
             <h4 class="mt-4">Câu hỏi không gắn đoạn văn</h4>
-            <?php $cauSo = 1; ?>
             <?php foreach ($no_passage_questions as $q): ?>
                 <div class="question-block">
                     <strong>Câu <?= $cauSo++ ?>:</strong> <?= htmlspecialchars($q['content']) ?>
-                    <form class="question-form d-none">
+                    <form class="question-form">
                         <?php
                         $options = [
                             'A' => $q['option_1'],
@@ -88,8 +88,7 @@ foreach ($questions as $q) {
                         ];
                         foreach ($options as $opt => $val): ?>
                             <div class="form-check">
-                                <input class="form-check-input" type="radio" name="q<?= $q['question_id'] ?>" value="<?= $opt ?>" id="q<?= $q['question_id'] . $opt ?>" disabled>
-
+                                <input class="form-check-input" disabled type="radio" name="q<?= $q['question_id'] ?>" value="<?= $opt ?>" id="q<?= $q['question_id'] . $opt ?>">
                                 <label class="form-check-label" for="q<?= $q['question_id'] . $opt ?>">
                                     <?= $opt ?>. <?= htmlspecialchars($val) ?>
                                 </label>
@@ -100,14 +99,13 @@ foreach ($questions as $q) {
             <?php endforeach; ?>
         <?php endif; ?>
 
-        <?php $cauSo = 1; ?>
         <?php foreach ($passages as $pid => $content): ?>
             <div class="passage-block">
                 <p><?= nl2br(htmlspecialchars($content)) ?></p>
                 <?php foreach ($grouped_questions[$pid] ?? [] as $q): ?>
                     <div class="question-block">
                         <strong>Câu <?= $cauSo++ ?>:</strong> <?= htmlspecialchars($q['content']) ?>
-                        <form class="question-form d-none">
+                        <form class="question-form">
                             <?php
                             $options = [
                                 'A' => $q['option_1'],
@@ -117,7 +115,7 @@ foreach ($questions as $q) {
                             ];
                             foreach ($options as $opt => $val): ?>
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="q<?= $q['question_id'] ?>" value="<?= $opt ?>" id="q<?= $q['question_id'] . $opt ?>" disabled>
+                                    <input class="form-check-input" disabled type="radio" name="q<?= $q['question_id'] ?>" value="<?= $opt ?>" id="q<?= $q['question_id'] . $opt ?>">
                                     <label class="form-check-label" for="q<?= $q['question_id'] . $opt ?>">
                                         <?= $opt ?>. <?= htmlspecialchars($val) ?>
                                     </label>
@@ -131,7 +129,6 @@ foreach ($questions as $q) {
 
     <?php else: ?>
         <h4>🎧 Danh sách câu hỏi Listening</h4>
-        <?php $cauSo = 1; ?>
         <?php foreach ($questions as $q): ?>
             <div class="question-block">
                 <strong>Câu <?= $cauSo++ ?>:</strong> <?= htmlspecialchars($q['content']) ?>
@@ -141,7 +138,7 @@ foreach ($questions as $q) {
                         Trình duyệt không hỗ trợ audio.
                     </audio>
                 <?php endif; ?>
-                <form class="question-form d-none">
+                <form class="question-form">
                     <?php
                     $options = [
                         'A' => $q['option_1'],
@@ -151,8 +148,7 @@ foreach ($questions as $q) {
                     ];
                     foreach ($options as $opt => $val): ?>
                         <div class="form-check">
-                            <input class="form-check-input" type="radio" name="q<?= $q['question_id'] ?>" value="<?= $opt ?>" id="q<?= $q['question_id'] . $opt ?>" disabled>
-
+                            <input class="form-check-input" disabled type="radio" name="q<?= $q['question_id'] ?>" value="<?= $opt ?>" id="q<?= $q['question_id'] . $opt ?>">
                             <label class="form-check-label" for="q<?= $q['question_id'] . $opt ?>">
                                 <?= $opt ?>. <?= htmlspecialchars($val) ?>
                             </label>
@@ -163,25 +159,24 @@ foreach ($questions as $q) {
         <?php endforeach; ?>
     <?php endif; ?>
 
+    <!-- SCRIPT -->
     <script>
-    document.getElementById('startExamBtn').addEventListener('click', function () {
-        this.classList.add('d-none');
-        document.getElementById('submitExamBtn').classList.remove('d-none');
+        // Khi nhấn "Làm bài thi"
+        document.getElementById('startExamBtn').addEventListener('click', function () {
+            this.classList.add('d-none');
+            document.getElementById('submitExamBtn').classList.remove('d-none');
 
-        // Bỏ ẩn form (nếu có)
-        document.querySelectorAll('.question-form').forEach(form => {
-            form.classList.remove('d-none');
+            // Gỡ disabled cho tất cả radio
+            document.querySelectorAll('input[type=radio]').forEach(input => {
+                input.disabled = false;
+            });
         });
-        // Kích hoạt các radio
-        document.querySelectorAll('input[type=radio]').forEach(input => {
-            input.disabled = false;
-        });
-    });
 
-    document.getElementById('submitForm').addEventListener('submit', function (e) {
-        e.preventDefault();
-        alert("🎉 Bài thi đã được nộp!");
-    });
-</script>
+        // Nộp bài
+        document.getElementById('submitForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            alert("🎉 Bài thi đã được nộp!\n(Bạn có thể xử lý chấm điểm ở bước tiếp theo.)");
+        });
+    </script>
 </body>
 </html>
