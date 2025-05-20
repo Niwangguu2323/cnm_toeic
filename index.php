@@ -224,7 +224,7 @@ $exam_result = mysqli_query($conn, $exam_sql);
                     </small>
                 </div>
                 <div class="text-center p-4 pb-0">
-                    <a class="btn btn-primary mb-0 w-100" href="templates/chitietbaithi.php?id=<?= $exam['exam_id'] ?>">Xem chi tiết bài thi</a>
+                    <a class="btn btn-primary mb-0 w-100" href="templates/examdetails.php?id=<?= $exam['exam_id'] ?>">Xem chi tiết bài thi</a>
                 </div>
             </div>
         </div>

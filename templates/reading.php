@@ -137,7 +137,7 @@ $exams = $model->getAllReadingExams();
                                 </small>
                             </div>
                             <div class="text-center p-4 pb-0">
-                                <a class="btn btn-primary mb-3 w-100" href="chitietbaithi.php?id=<?= $exam['exam_id'] ?>">
+                                <a class="btn btn-primary mb-3 w-100" href="examdetails.php?id=<?= $exam['exam_id'] ?>">
     Xem chi tiết bài thi
 </a>
                             </div>
