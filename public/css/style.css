@@ -20,6 +20,7 @@
     bottom: 45px;
     z-index: 99;
 }
+<<<<<<< HEAD
 .dropdown-submenu {
     position: relative;
 }
@@ -29,6 +30,14 @@
     position: absolute;
     top: 0%;
     left: 100%;
+=======
+
+/* Submenu ẩn mặc định */
+.dropdown-submenu .submenu {
+    display: none;
+    position: absolute;
+    top: 100%; 
+>>>>>>> fd6d357f684cb4ebcf4c5ab4062affc5fa93fa1d
     background-color: white;
     min-width: 180px;
     border: 1px solid rgba(0, 0, 0, 0.15);
@@ -38,15 +47,15 @@
     z-index: 1000;
 }
 
-/* Hiện submenu khi hover vào Admin */
+/* Hover vào Admin thì hiện submenu */
 .dropdown-submenu:hover .submenu {
     display: block;
 }
 
-/* Tùy chọn: khi hover vào Admin, đổi màu, thêm icon, highlight... */
-.submenu-toggle:hover {
-    font-weight: bold;
+/* Hover hiệu ứng cho Admin */
+.dropdown-submenu > .dropdown-item:hover {
     background-color: #f8f9fa;
+    font-weight: bold;
 }
 
 
