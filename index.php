@@ -79,18 +79,8 @@ $exam_result = mysqli_query($conn, $exam_sql);
                     <div class="dropdown-menu dropdown-menu-end">
                         <a href="templates/profile.php" class="dropdown-item">Sửa thông tin</a>
                         <a href="templates/logout.php" class="dropdown-item text-danger">Đăng xuất</a>
-<<<<<<< HEAD
-                        <div class="dropdown-submenu">
-                            <a href="#" class="dropdown-item submenu-toggle">Admin</a>
-                            <ul class="submenu">
-                            <li><a href="admin/exam_manage.php" class="dropdown-item">Quản lý bài thi</a></li>
-                            <li><a href="#" class="dropdown-item">Quản lý người dùng</a></li>
-            </ul>
-                        </div>
-=======
                         <a href="admin/exam_manage.php" class="dropdown-item">Quản lý bài thi</a>
                         <a href="#" class="dropdown-item">Quản lý người dùng</a>
->>>>>>> fd6d357f684cb4ebcf4c5ab4062affc5fa93fa1d
                     </div>
                 </div>
             <?php else: ?>
