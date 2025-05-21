@@ -84,7 +84,7 @@ $exam_result = mysqli_query($conn, $exam_sql);
                             <ul class="submenu">
                             <li><a href="admin/exam_manage.php" class="dropdown-item">Quản lý bài thi</a></li>
                             <li><a href="#" class="dropdown-item">Quản lý người dùng</a></li>
-                            </ul>
+            </ul>
                         </div>
                     </div>
                 </div>
