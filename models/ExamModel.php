@@ -10,7 +10,8 @@ class ExamModel {
     }
     public function getConn() {
     return $this->conn;
-}
+    }
+
     public function xuatDuLieu($sql) {
         $result = mysqli_query($this->conn, $sql);
 
@@ -27,6 +28,49 @@ class ExamModel {
 
         header("Content-Type: application/json; charset=UTF-8");
         echo json_encode($data);
+    }
+
+    public function updateQuestion($data) {
+        $sql = "UPDATE exam_question 
+                SET content = ?, 
+                    audio_url = ?, 
+                    correct_answer = ?, 
+                    option_1 = ?, 
+                    option_2 = ?, 
+                    option_3 = ?, 
+                    option_4 = ?, 
+                    passage_id = ?,
+                    listening_id = ?
+                WHERE question_id = ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            http_response_code(500);
+            echo json_encode(["error" => "Lỗi prepare: " . $this->conn->error]);
+            return false;
+        }
+
+        $stmt->bind_param(
+            "sssssssiii",
+            $data['content'],
+            $data['audio_url'],
+            $data['correct_answer'],
+            $data['option_1'],
+            $data['option_2'],
+            $data['option_3'],
+            $data['option_4'],
+            $data['passage_id'],
+            $data['question_id'],
+            $data['listening_id']
+        );
+
+        if ($stmt->execute()) {
+            return true;
+        } else {
+            http_response_code(500);
+            echo json_encode(["error" => "Lỗi execute: " . $stmt->error]);
+            return false;
+        }
     }
 
     public function getAllExams() {

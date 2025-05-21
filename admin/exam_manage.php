@@ -71,7 +71,7 @@
                     document.querySelectorAll('#examTable tbody tr').forEach(row => {
                         row.addEventListener('click', () => {
                             const examId = row.getAttribute('data-id');
-                            window.location.href = `exam_detail.php?id=${examId}`;
+                            window.location.href = `exam_detail_manage.php?id=${examId}`;
                         });
                     });
                 })
