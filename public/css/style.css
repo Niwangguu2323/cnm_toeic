@@ -20,7 +20,6 @@
     bottom: 45px;
     z-index: 99;
 }
-<<<<<<< HEAD
 .dropdown-submenu {
     position: relative;
 }
@@ -30,14 +29,13 @@
     position: absolute;
     top: 0%;
     left: 100%;
-=======
+}
 
 /* Submenu ẩn mặc định */
 .dropdown-submenu .submenu {
     display: none;
     position: absolute;
     top: 100%; 
->>>>>>> fd6d357f684cb4ebcf4c5ab4062affc5fa93fa1d
     background-color: white;
     min-width: 180px;
     border: 1px solid rgba(0, 0, 0, 0.15);
