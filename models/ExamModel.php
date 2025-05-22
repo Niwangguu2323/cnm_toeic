@@ -31,16 +31,22 @@ class ExamModel {
     }
 
     public function updateQuestion($data) {
+        // Trích xuất dữ liệu từ mảng $data
+        $question_id = $data['question_id'];
+        $content = $data['content'];
+        $correct_answer = $data['correct_answer'];
+        $option_1 = $data['option_1'];
+        $option_2 = $data['option_2'];
+        $option_3 = $data['option_3'];
+        $option_4 = $data['option_4'];
+
         $sql = "UPDATE exam_question 
                 SET content = ?, 
-                    audio_url = ?, 
                     correct_answer = ?, 
                     option_1 = ?, 
                     option_2 = ?, 
                     option_3 = ?, 
-                    option_4 = ?, 
-                    passage_id = ?,
-                    listening_id = ?
+                    option_4 = ?
                 WHERE question_id = ?";
 
         $stmt = $this->conn->prepare($sql);
@@ -51,27 +57,32 @@ class ExamModel {
         }
 
         $stmt->bind_param(
-            "sssssssiii",
-            $data['content'],
-            $data['audio_url'],
-            $data['correct_answer'],
-            $data['option_1'],
-            $data['option_2'],
-            $data['option_3'],
-            $data['option_4'],
-            $data['passage_id'],
-            $data['question_id'],
-            $data['listening_id']
+            "ssssssi",
+            $content,
+            $correct_answer,
+            $option_1,
+            $option_2,
+            $option_3,
+            $option_4,
+            $question_id
         );
 
         if ($stmt->execute()) {
-            return true;
+            // Kiểm tra xem có hàng nào bị ảnh hưởng không
+            if ($stmt->affected_rows > 0) {
+                return true;
+            } else {
+                http_response_code(500);
+                echo json_encode(["error" => "Không có dữ liệu nào được cập nhật"]);
+                return false;
+            }
         } else {
             http_response_code(500);
             echo json_encode(["error" => "Lỗi execute: " . $stmt->error]);
             return false;
         }
     }
+
 
     public function getAllExams() {
     $sql = "SELECT exam_id, title, type, duration_minutes, difficulty_level FROM exam";
