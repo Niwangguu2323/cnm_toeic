@@ -84,9 +84,9 @@ class UserController {
             }
         }
 
-        // CHỈ THÊM PHƯƠNG THỨC NÀY - SỬA ĐỂ SỬ DỤNG ketnoi THAY VÌ clsKetNoi
+        // Phương thức runQuery để thực thi câu lệnh SELECT
         public function runQuery($sql) {
-            $p = new ketnoi(); 
+            $p = new ketnoi(); // Sử dụng ketnoi thay vì clsKetNoi
             $con = $p->moketnoi();
             if($con) {
                 $result = $con->query($sql);
@@ -95,6 +95,30 @@ class UserController {
             } else {
                 return false; // không thể kết nối với CSDL
             }
+        }
+
+        // Phương thức updateUser để thực thi câu lệnh UPDATE
+        public function updateUser($sql) {
+            $p = new ketnoi();
+            $con = $p->moketnoi();
+            
+            if($con) {
+                if($con->query($sql) === TRUE) {
+                    $p->dongketnoi($con);
+                    return true; // Trả về true nếu cập nhật thành công
+                } else {
+                    $p->dongketnoi($con);
+                    return false; // Trả về false nếu có lỗi khi cập nhật
+                }
+            } else {
+                return false; // Trả về false nếu không thể kết nối đến cơ sở dữ liệu
+            }
+        }
+
+        // Phương thức getConnection để lấy kết nối database (dùng cho escape string)
+        public function getConnection() {
+            $p = new ketnoi();
+            return $p->moketnoi();
         }
     
 }

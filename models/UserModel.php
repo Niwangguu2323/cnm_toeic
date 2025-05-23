@@ -1,4 +1,5 @@
 <?php
+    // Sử dụng đường dẫn tuyệt đối thay vì tương đối
     require_once __DIR__ . '/../controllers/UserController.php';
     
     class UserModel{
@@ -59,6 +60,44 @@
 
             header("Content-Type: application/json; charset=UTF-8");
             echo json_encode($data);
+        }
+
+        // Hàm cập nhật thông tin người dùng
+        public function updateUser($data) {
+            try {
+                $p = new UserController();
+                
+                // Chuẩn bị câu SQL update
+                $sql = "UPDATE user SET 
+                        user_name = '" . mysqli_real_escape_string($p->getConnection(), $data['user_name']) . "',
+                        email = '" . mysqli_real_escape_string($p->getConnection(), $data['email']) . "',
+                        password = '" . mysqli_real_escape_string($p->getConnection(), $data['password']) . "',
+                        full_name = '" . mysqli_real_escape_string($p->getConnection(), $data['full_name']) . "',
+                        phone = '" . mysqli_real_escape_string($p->getConnection(), $data['phone']) . "',
+                        role = '" . mysqli_real_escape_string($p->getConnection(), $data['role']) . "'
+                        WHERE user_id = " . intval($data['user_id']);
+                
+                // Thực thi câu lệnh update
+                $result = $p->updateUser($sql);
+                
+                if ($result) {
+                    return [
+                        "success" => true,
+                        "message" => "Cập nhật thông tin người dùng thành công"
+                    ];
+                } else {
+                    return [
+                        "success" => false,
+                        "message" => "Không thể cập nhật thông tin người dùng"
+                    ];
+                }
+                
+            } catch (Exception $e) {
+                return [
+                    "success" => false,
+                    "message" => "Lỗi: " . $e->getMessage()
+                ];
+            }
         }
         
     }
