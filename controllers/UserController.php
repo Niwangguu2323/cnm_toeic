@@ -83,7 +83,18 @@ class UserController {
             return false;// khoong thể kết nối với CSDL
             }
         }
+
+        // CHỈ THÊM PHƯƠNG THỨC NÀY - SỬA ĐỂ SỬ DỤNG ketnoi THAY VÌ clsKetNoi
+        public function runQuery($sql) {
+            $p = new ketnoi(); 
+            $con = $p->moketnoi();
+            if($con) {
+                $result = $con->query($sql);
+                $p->dongketnoi($con);
+                return $result;
+            } else {
+                return false; // không thể kết nối với CSDL
+            }
+        }
     
 }
-
-

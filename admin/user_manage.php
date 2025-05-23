@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="utf-8">
-    <title>2N Toeic Lab - Chi tiết bài thi</title>
+    <title>2N Toeic Lab - Quản lý người dùng</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -33,25 +33,22 @@
 </head>
 <body class="p-4">
     <a href="../index.php" class="btn btn-secondary">Trở lại trang chủ</a> </br></br>
-    <a href="exam_manage.php" class="btn btn-primary">Các bài thi</a> </br></br>
-    <h3 class="mb-4">📘 Chi tiết bài thi</h3>
+    <a href="#" class="btn btn-danger" id="btnDeleteUser">Xóa người dùng</a> </br></br>
+    <h3 class="mb-4">📘 Danh sách người dùng</h3>
     <div class="container-fluid">
         <div class="row">
-            <!-- BÊN TRÁI: DANH SÁCH CÂU HỎI -->
-            <div class="col-md-9 table-responsive" style="overflow-x: auto;">
-                <table class="table table-bordered table-striped table-hover" id="exam_detailTable">
+            <!-- BÊN TRÁI: DANH SÁCH NGƯỜI DÙNG -->
+            <div class="col-md-8 table-responsive" style="overflow-x: auto;">
+                <table class="table table-bordered table-striped table-hover" id="userTable">
                     <thead class="table-dark">
                         <tr>
-                            <th>ID câu hỏi</th>
-                            <th>ID bài thi</th>
-                            <th>Nội dung câu hỏi</th>
-                            <th>Đáp án đúng</th>
-                            <th>Lựa chọn 1</th>
-                            <th>Lựa chọn 2</th>
-                            <th>Lựa chọn 3</th>
-                            <th>Lựa chọn 4</th>
-                            <th>ID đoạn văn</th>
-                            <th>ID bài nghe</th>
+                            <th>ID</th>
+                            <th>Tên người dùng</th>
+                            <th>Email</th>
+                            <th>Mật khẩu</th>
+                            <th>Tên đầy đủ</th>
+                            <th>Số điện thoại</th>
+                            <th>Loại người dùng</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -61,17 +58,23 @@
             </div>
 
             <!-- BÊN PHẢI: FORM CHỈNH SỬA -->
-            <div class="col-md-3">
-            <h4 class="mb-3">Sửa câu hỏi</h4>
+            <div class="col-md-4">
+            <h4 class="mb-3">Sửa thông tin người dùng</h4>
             <form id="updateForm">
                 
-                <div class="mb-2"><label>Mã câu hỏi</label><input class="form-control" id="question_id" disabled></div>
-                <div class="mb-2"><label>Nội dung</label><textarea class="form-control" id="content" rows="2"></textarea></div>
-                <div class="mb-2"><label>Đáp án đúng</label><input class="form-control" id="correct_answer"></div>
-                <div class="mb-2"><label>Option 1</label><input class="form-control" id="option_1"></div>
-                <div class="mb-2"><label>Option 2</label><input class="form-control" id="option_2"></div>
-                <div class="mb-2"><label>Option 3</label><input class="form-control" id="option_3"></div>
-                <div class="mb-2"><label>Option 4</label><input class="form-control" id="option_4"></div>
+                <div class="mb-2"><label>ID</label><input class="form-control" id="user_id" disabled></div>
+                <div class="mb-2"><label>Tên người dùng</label><input class="form-control" id="user_name"></div>
+                <div class="mb-2"><label>Email</label><input class="form-control" id="email"></div>
+                <div class="mb-2"><label>Mật khẩu</label><input class="form-control" id="password"></div>
+                <div class="mb-2"><label>Tên đầy đủ</label><input class="form-control" id="full_name"></div>
+                <div class="mb-2"><label>Số điện thoại</label><input class="form-control" id="phone"></div>
+                <div class="mb-2"><label>Loại người dùng</label>
+                    <select class="form-select" id="role" required>
+                        <option value="">Chọn loại người dùng</option>
+                        <option value="user">User</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
                 <button class="btn btn-success mt-3" type="submit">Cập nhật</button>
             </form>
             </div>
@@ -80,58 +83,49 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const params = new URLSearchParams(window.location.search);
-            const exam_id = params.get("id");
-
-            if (!exam_id) {
-                console.error("Không có exam_id trên URL!");
-                return;
-            }
-
-            fetch(`../api/exam/getdetails.php?id=${exam_id}`)
+            fetch('../api/user/get.php')
                 .then(response => response.json())
                 .then(data => {
+                    console.log("Dữ liệu nhận được:", data); // Debug log
+                    
                     if (!Array.isArray(data)) {
                         console.error("Dữ liệu trả về không phải mảng:", data);
                         return;
                     }
 
                     let rows = '';
-                    data.forEach(exam_question => {
+                    data.forEach(user => {
                         rows += `
-                            <tr data-id="${exam_question.question_id}">
-                                <td>${exam_question.question_id}</td>
-                                <td>${exam_question.exam_id}</td>
-                                <td>${exam_question.content}</td>
-                                <td>${exam_question.correct_answer}</td>
-                                <td>${exam_question.option_1}</td>
-                                <td>${exam_question.option_2}</td>
-                                <td>${exam_question.option_3}</td>
-                                <td>${exam_question.option_4}</td>
-                                <td>${exam_question.passage_id}</td>
-                                <td>${exam_question.listening_id}</td>
+                            <tr data-id="${user.user_id}">
+                                <td>${user.user_id}</td>
+                                <td>${user.user_name}</td>
+                                <td>${user.email}</td>
+                                <td>${user.password}</td>
+                                <td>${user.full_name}</td>
+                                <td>${user.phone}</td>
+                                <td>${user.role}</td>
                             </tr>`;
                     });
 
-                    const tbody = document.querySelector('#exam_detailTable tbody');
+                    const tbody = document.querySelector('#userTable tbody');
                     if (tbody) {
                         tbody.innerHTML = rows;
 
-                        // GẮN SỰ KIỆN CLICK SAU KHI ĐÃ ĐỔ DỮ LIỆU
+                        // GẮN SỰ KIỆN CLICK CHỌN DÒNG
                         tbody.querySelectorAll('tr').forEach(row => {
                             row.addEventListener('click', () => {
                                 const cells = row.children;
-                                document.getElementById('question_id').value = cells[0].textContent;
-                                document.getElementById('content').value = cells[2].textContent;
-                                document.getElementById('correct_answer').value = cells[3].textContent;
-                                document.getElementById('option_1').value = cells[4].textContent;
-                                document.getElementById('option_2').value = cells[5].textContent;
-                                document.getElementById('option_3').value = cells[6].textContent;
-                                document.getElementById('option_4').value = cells[7].textContent
+                                document.getElementById('user_id').value = cells[0].textContent;
+                                document.getElementById('user_name').value = cells[1].textContent;
+                                document.getElementById('email').value = cells[2].textContent;
+                                document.getElementById('password').value = cells[3].textContent;
+                                document.getElementById('full_name').value = cells[4].textContent;
+                                document.getElementById('phone').value = cells[5].textContent;
+                                document.getElementById('role').value = cells[6].textContent;
                             });
                         });
                     } else {
-                        console.error("Không tìm thấy <tbody>");
+                        console.error("Không tìm thấy <tbody>!");
                     }
                 })
                 .catch(error => {
@@ -142,16 +136,16 @@
             document.getElementById('updateForm').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const data = {
-                    question_id: document.getElementById('question_id').value,
-                    content: document.getElementById('content').value,
-                    correct_answer: document.getElementById('correct_answer').value,
-                    option_1: document.getElementById('option_1').value,
-                    option_2: document.getElementById('option_2').value,
-                    option_3: document.getElementById('option_3').value,
-                    option_4: document.getElementById('option_4').value
+                    user_id: document.getElementById('user_id').value,
+                    user_name: document.getElementById('user_name').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                    full_name: document.getElementById('full_name').value,
+                    phone: document.getElementById('phone').value,
+                    role: document.getElementById('role').value
                 };
 
-                fetch('../api/exam/update_question.php', {
+                fetch('../api/user/update.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(data)

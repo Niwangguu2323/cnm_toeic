@@ -80,8 +80,8 @@ if (!isset($_SESSION["user_email"])) {
                         <a href="logout.php" class="dropdown-item text-danger">Đăng xuất</a>
                         <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                         <div class="dropdown-divider"></div>
-                            <a href="admin/exam_manage.php" class="dropdown-item">Quản lý bài thi</a>
-                            <a href="#" class="dropdown-item">Quản lý người dùng</a>
+                            <a href="../admin/exam_manage.php" class="dropdown-item">Quản lý bài thi</a>
+                            <a href="../admin/user_manage.php" class="dropdown-item">Quản lý người dùng</a>
                         <?php endif; ?>
                     </div>
                 </div>

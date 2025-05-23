@@ -1,5 +1,6 @@
 <?php
-    include_once("../controllers/UserController.php");
+    require_once __DIR__ . '/../controllers/UserController.php';
+    
     class UserModel{
         public function getUser(){
             $p= new UserController();
@@ -40,13 +41,25 @@
                 }
             }
         }
-        
-       
-        
-        
-       
+
+        public function xuatDuLieu($sql) {
+            $p = new UserController();
+            $result = $p->runQuery($sql); // giống cách gọi trong getUser()
+
+            if (!$result) {
+                http_response_code(500);
+                echo json_encode(["error" => "Truy vấn thất bại"]);
+                return;
+            }
+
+            $data = [];
+            while ($row = mysqli_fetch_assoc($result)) {
+                $data[] = $row;
+            }
+
+            header("Content-Type: application/json; charset=UTF-8");
+            echo json_encode($data);
+        }
         
     }
-
-  
 ?>
