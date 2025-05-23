@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th5 21, 2025 lúc 05:24 PM
+-- Thời gian đã tạo: Th5 23, 2025 lúc 09:16 AM
 -- Phiên bản máy phục vụ: 5.7.31
 -- Phiên bản PHP: 7.3.21
 
@@ -511,6 +511,7 @@ CREATE TABLE IF NOT EXISTS `subcription` (
 DROP TABLE IF EXISTS `user`;
 CREATE TABLE IF NOT EXISTS `user` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `full_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
@@ -520,14 +521,16 @@ CREATE TABLE IF NOT EXISTS `user` (
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `email` (`email`),
   KEY `FK_sub` (`subscription_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `user`
 --
 
-INSERT INTO `user` (`user_id`, `email`, `password`, `full_name`, `phone`, `subscription_id`, `role`) VALUES
-(1, 'Nar@gmail.com', '123', 'Hồ Thái', '0814305505', NULL, 'user');
+INSERT INTO `user` (`user_id`, `user_name`, `email`, `password`, `full_name`, `phone`, `subscription_id`, `role`) VALUES
+(1, 'naruma262', 'Nar@gmail.com', '123', 'Hồ Thái', '0814305505', NULL, 'user'),
+(2, 'naruma', 'narumal262@gmail.com', '123', 'Hồ Quốc Thái', '0814305505', NULL, 'user'),
+(3, 'NaN', 'nhivanar@gmail.com', 'nhivanar', 'Nhi Va Nar', '0814305505', NULL, 'admin');
 
 --
 -- Các ràng buộc cho các bảng đã đổ
