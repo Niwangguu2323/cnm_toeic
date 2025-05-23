@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th5 23, 2025 lúc 09:16 AM
+-- Thời gian đã tạo: Th5 23, 2025 lúc 09:42 AM
 -- Phiên bản máy phục vụ: 5.7.31
 -- Phiên bản PHP: 7.3.21
 
@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `exam` (
 --
 
 INSERT INTO `exam` (`exam_id`, `title`, `type`, `duration_minutes`, `difficulty_level`) VALUES
-(1, 'New Economy TOEIC Test 1', 'Reading', 100, 1),
+(1, 'New Economy TOEIC Test 1', 'Reading', 3, 1),
 (2, 'New Economy TOEIC Test 2', 'Reading', 100, 1),
 (3, 'New Economy TOEIC Test 3', 'Reading', 80, 2),
 (4, '	\r\nNew Economy TOEIC Test Listening 1', 'Listening', 100, 1);
@@ -491,20 +491,6 @@ INSERT INTO `reading_passage` (`passage_id`, `exam_id`, `content`, `audio_url`) 
 -- --------------------------------------------------------
 
 --
--- Cấu trúc bảng cho bảng `subcription`
---
-
-DROP TABLE IF EXISTS `subcription`;
-CREATE TABLE IF NOT EXISTS `subcription` (
-  `subcription_id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `price` int(11) NOT NULL,
-  PRIMARY KEY (`subcription_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Cấu trúc bảng cho bảng `user`
 --
 
@@ -516,21 +502,19 @@ CREATE TABLE IF NOT EXISTS `user` (
   `password` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `full_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `phone` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `subscription_id` int(11) DEFAULT NULL,
   `role` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'user',
   PRIMARY KEY (`user_id`),
-  UNIQUE KEY `email` (`email`),
-  KEY `FK_sub` (`subscription_id`)
+  UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `user`
 --
 
-INSERT INTO `user` (`user_id`, `user_name`, `email`, `password`, `full_name`, `phone`, `subscription_id`, `role`) VALUES
-(1, 'naruma262', 'Nar@gmail.com', '123', 'Hồ Thái', '0814305505', NULL, 'user'),
-(2, 'naruma', 'narumal262@gmail.com', '123', 'Hồ Quốc Thái', '0814305505', NULL, 'user'),
-(3, 'NaN', 'nhivanar@gmail.com', 'nhivanar', 'Nhi Va Nar', '0814305505', NULL, 'admin');
+INSERT INTO `user` (`user_id`, `user_name`, `email`, `password`, `full_name`, `phone`, `role`) VALUES
+(1, 'naruma262', 'Nar@gmail.com', '123', 'Hồ Thái', '0814305505', 'user'),
+(2, 'naruma', 'narumal262@gmail.com', '123', 'Hồ Quốc Thái', '0814305505', 'user'),
+(3, 'NaN', 'nhivanar@gmail.com', 'nhivanar', 'Nhi Va Nar', '0814305505', 'admin');
 
 --
 -- Các ràng buộc cho các bảng đã đổ
@@ -569,12 +553,6 @@ ALTER TABLE `pracetice_result`
 --
 ALTER TABLE `reading_passage`
   ADD CONSTRAINT `FK_Exam11` FOREIGN KEY (`exam_id`) REFERENCES `exam` (`exam_id`);
-
---
--- Các ràng buộc cho bảng `user`
---
-ALTER TABLE `user`
-  ADD CONSTRAINT `FK_sub` FOREIGN KEY (`subscription_id`) REFERENCES `subcription` (`subcription_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
