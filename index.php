@@ -6,6 +6,7 @@ $conn = $db->moketnoi();
 $exam_sql = "SELECT * FROM exam ORDER BY exam_id DESC LIMIT 3";
 $exam_result = mysqli_query($conn, $exam_sql);
 error_reporting(0);
+
 ?>
 
 <!DOCTYPE html>

@@ -1,3 +1,13 @@
+<?php
+session_start();
+
+// Nếu chưa đăng nhập hoặc không phải là admin thì chặn truy cập
+if (!isset($_SESSION["user_email"]) || $_SESSION["user_role"] !== 'admin') {
+    header("Location: ../index.php");
+    exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>

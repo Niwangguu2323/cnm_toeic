@@ -2,7 +2,6 @@
 error_reporting(0);
 session_start();
 require_once __DIR__ . '/../config/db.php';
-
 $db = new ketnoi();
 $conn = $db->moketnoi();
 
@@ -162,7 +161,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
     <!-- Footer End -->
 <?php
-$_SESSION['user_role'] = $user['role'];
+$_SESSION["user_email"] = $email;
+$_SESSION["role"] = $user['role'];
 ?>
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
