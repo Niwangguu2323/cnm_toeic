@@ -1,34 +1,60 @@
 <?php
-error_reporting(0);
 session_start();
 require_once __DIR__ . '/../config/db.php';
 
 $db = new ketnoi();
 $conn = $db->moketnoi();
 
-$error = "";
+$errors = [];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $email = $_POST["txt_email"] ?? '';
-    $password = $_POST["password"] ?? '';
+    $user_name = trim($_POST['user_name'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
+    $confirm_password = $_POST['confirm_password'] ?? '';
+    $full_name = trim($_POST['full_name'] ?? '');
+    $phone = trim($_POST['phone'] ?? '');
 
-    // Tìm user theo email
-    $query = "SELECT * FROM user WHERE email = '$email' AND password = '$password'";
-    $result = mysqli_query($conn, $query);
-    $user = mysqli_fetch_assoc($result);
+    // Kiểm tra username không có ký tự đặc biệt
+    if (!preg_match('/^[a-zA-Z0-9_]+$/', $user_name)) {
+        $errors[] = "Tên đăng nhập không hợp lệ (không chứa ký tự đặc biệt)";
+    }
 
-    if ($user) {
-        // Lưu vào session
-        $_SESSION["user_email"] = $user["email"];
-        $_SESSION["user_role"] = $user["role"]; // 🌟 THÊM DÒNG NÀY
+    // Kiểm tra email hợp lệ
+    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = "Email không hợp lệ.";
+    }
 
-        header("Location: ../index.php");
-        exit;
-    } else {
-        $error = "Email hoặc mật khẩu không đúng";
+    // Kiểm tra mật khẩu trùng khớp
+    if ($password !== $confirm_password) {
+        $errors[] = "Mật khẩu xác nhận không khớp.";
+    }
+
+    // Kiểm tra số điện thoại
+    if (!preg_match('/^[0-9]{9,11}$/', $phone)) {
+        $errors[] = "Số điện thoại không hợp lệ.";
+    }
+
+    // Kiểm tra email đã tồn tại
+    $email_check = mysqli_query($conn, "SELECT * FROM user WHERE email = '$email'");
+    if (mysqli_num_rows($email_check) > 0) {
+        $errors[] = "Email đã được đăng ký.";
+    }
+
+    // Nếu không có lỗi thì insert
+    if (empty($errors)) {
+        $password = mysqli_real_escape_string($conn, $password); // bạn có thể thay bằng password_hash
+        $sql = "INSERT INTO user (user_name, email, password, full_name, phone)
+                VALUES ('$user_name', '$email', '$password', '$full_name', '$phone')";
+        if (mysqli_query($conn, $sql)) {
+            $_SESSION['user_email'] = $email;
+            header("Location: ../index.php");
+            exit;
+        } else {
+            $errors[] = "Đăng ký thất bại. Vui lòng thử lại.";
+        }
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -87,32 +113,42 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
     <!-- Login Page Start -->
-    <div class="container-fluid bg-primary py-5 mb-5 page-header">
-        <div class="container py-5">
-            <div class="row justify-content-center">
-                <div class="col-lg-10 text-center">
-                    <h1 class="display-3 text-white animated slideInDown">Đăng nhập</h1>
-                   <?php if (!empty($error)): ?>
-    <div class="alert alert-danger text-center"><?= htmlspecialchars($error) ?></div>
-<?php endif; ?>
-                    <form action="" method="POST" class="col-5 mx-auto" autocomplete="off">
-                            <input type="text" style="display:none">
-                            <input type="password" style="display:none">
-                        <div class="mb-3">
-                            <input type="email" class="form-control rounded-pill" id="email" name="txt_email" placeholder="Nhập email của bạn" required>
-                        </div>
-                        <div class="mb-3">
-                            <input type="password" class="form-control rounded-pill" id="password" name="password" placeholder="Nhập mật khẩu" required>
-                        </div>
-                        <br>
-                        <button type="submit" class="btn btn-primary w-100 rounded-pill">Đăng nhập</button>
-                        <br>
-                        <a href="./register.php" style="color:red font-style:italic">Bạn chưa có tài khoản? Đăng ký tại đây</a>
-                    </form>
-                </div>
-            </div>
+   <div class="container-fluid bg-primary py-5 mb-5 page-header">
+    <h2 class="text-center text-primary mb-4">Đăng ký tài khoản</h2>
+    <?php if (!empty($errors)): ?>
+        <div class="alert alert-danger">
+            <ul>
+                <?php foreach ($errors as $e): ?>
+                    <li><?= htmlspecialchars($e) ?></li>
+                <?php endforeach; ?>
+            </ul>
         </div>
-    </div>
+    <?php endif; ?>
+    <form method="POST" class="col-md-6 offset-md-3">
+        <div class="mb-3">
+            <input type="text" name="user_name" class="form-control rounded-pill" placeholder="Tên đăng nhập" required value="<?= htmlspecialchars($user_name ?? '') ?>">
+        </div>
+        <div class="mb-3">
+            <input type="email" name="email" class="form-control rounded-pill" placeholder="Email" required value="<?= htmlspecialchars($email ?? '') ?>">
+        </div>
+        <div class="mb-3">
+            <input type="password" name="password" class="form-control rounded-pill" placeholder="Mật khẩu" required>
+        </div>
+        <div class="mb-3">
+            <input type="password" name="confirm_password" class="form-control rounded-pill" placeholder="Nhập lại mật khẩu" required>
+        </div>
+        <div class="mb-3">
+            <input type="text" name="full_name" class="form-control rounded-pill" placeholder="Họ tên" required value="<?= htmlspecialchars($full_name ?? '') ?>">
+        </div>
+        <div class="mb-3">
+            <input type="text" name="phone" class="form-control rounded-pill" placeholder="Số điện thoại" required value="<?= htmlspecialchars($phone ?? '') ?>">
+        </div>
+        <button type="submit" class="btn btn-primary w-100 rounded-pill">Đăng ký</button>
+        <p class="text-center mt-3 ">
+             <a href="login.php">Đã có tài khoản? Đăng nhập</a>
+        </p>
+    </form>
+</div>
     <!-- Login Page End -->
     <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
@@ -161,9 +197,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
     </div>
     <!-- Footer End -->
-<?php
-$_SESSION['user_role'] = $user['role'];
-?>
+
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -11,5 +11,7 @@ class ketnoi {
             return $conn;
         }
     }
+    public function dongketnoi($conn) {
+            $conn -> close(); }
 }
 ?>

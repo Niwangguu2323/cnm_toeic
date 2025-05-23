@@ -5,6 +5,7 @@ $db = new ketnoi();
 $conn = $db->moketnoi();
 $exam_sql = "SELECT * FROM exam ORDER BY exam_id DESC LIMIT 3";
 $exam_result = mysqli_query($conn, $exam_sql);
+error_reporting(0);
 ?>
 
 <!DOCTYPE html>
@@ -79,10 +80,13 @@ $exam_result = mysqli_query($conn, $exam_sql);
                     <div class="dropdown-menu dropdown-menu-end">
                         <a href="templates/profile.php" class="dropdown-item">Sửa thông tin</a>
                         <a href="templates/logout.php" class="dropdown-item text-danger">Đăng xuất</a>
-                        <a href="admin/exam_manage.php" class="dropdown-item">Quản lý bài thi</a>
-                        <a href="#" class="dropdown-item">Quản lý người dùng</a>
+                        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                        <div class="dropdown-divider"></div>
+                            <a href="admin/exam_manage.php" class="dropdown-item">Quản lý bài thi</a>
+                            <a href="#" class="dropdown-item">Quản lý người dùng</a>
+                        <?php endif; ?>
                     </div>
-                </div>
+                </div> 
             <?php else: ?>
                 <a href="templates/login.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Đăng nhập<i class="fa fa-arrow-right ms-3"></i></a>
             <?php endif; ?>
