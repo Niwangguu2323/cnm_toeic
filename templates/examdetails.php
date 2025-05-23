@@ -185,7 +185,10 @@ if ($exam['type'] === 'Listening') {
     <?php endif; ?>
 
     <button id="startExamBtn" class="btn btn-success mb-4">🎯 Làm bài thi</button>
-
+   <!-- Thời gian làm bài -->
+<div id="countdown-timer" class="mb-4 fs-5 fw-bold text-danger" style="display: none;">
+    ⏳ Thời gian còn lại: <span id="timer">--:--</span>
+</div>
     <form method="POST" id="submitForm">
         <button type="submit" class="btn btn-primary mb-4 d-none" id="submitExamBtn">📝 Nộp bài</button>
 
@@ -334,5 +337,39 @@ if ($exam['type'] === 'Listening') {
 
         
     </script>
+    <script>
+    document.getElementById('startExamBtn').addEventListener('click', function () {
+        // Hiện nút nộp bài
+        this.classList.add('d-none');
+        document.getElementById('submitExamBtn').classList.remove('d-none');
+
+        // Kích hoạt chọn đáp án
+        document.querySelectorAll('input[type=radio]').forEach(input => {
+            input.disabled = false;
+        });
+
+        // Hiển thị đồng hồ đếm ngược
+        document.getElementById('countdown-timer').style.display = 'block';
+
+        // Thời gian thi từ PHP (đơn vị phút)
+        let durationMinutes = <?= (int) $exam['duration_minutes'] ?>;
+        let remainingTime = durationMinutes * 60; // Đổi ra giây
+
+        const timerDisplay = document.getElementById('timer');
+        const timerInterval = setInterval(() => {
+            const minutes = Math.floor(remainingTime / 60);
+            const seconds = remainingTime % 60;
+            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+            remainingTime--;
+
+            if (remainingTime < 0) {
+                clearInterval(timerInterval);
+                timerDisplay.textContent = "00:00";
+                alert("⏰ Thời gian của bạn đã hết. Bài thi sẽ được nộp tự động!");
+                document.getElementById('submitForm').submit();
+            }
+        }, 1000);
+    });
+</script>
 </body>
 </html>
