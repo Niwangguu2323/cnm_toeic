@@ -5,7 +5,7 @@ require_once __DIR__ . '/../models/ExamModel.php';
 $model = new ExamModel();
 $exam_id = $_GET['id'] ?? 0;
 
-$conn = $model->getConn(); // Đảm bảo ExamModel có hàm getConn()
+$conn = $model->getConn();
 
 $exam_sql = "SELECT * FROM exam WHERE exam_id = $exam_id";
 $exam_result = mysqli_query($conn, $exam_sql);
@@ -16,12 +16,9 @@ if (!$exam) {
     exit;
 }
 
-
-
 // HÀM QUY ĐỔI ĐIỂM THEO BẢNG TOEIC
 function quyDoiDiemReading($soCauDung) {
     $bangDiem = [
-        // Dựa vào bảng bạn cung cấp
         0 => 5, 1 => 5, 2 => 5, 3 => 10, 4 => 15, 5 => 20,
         6 => 25, 7 => 30, 8 => 35, 9 => 40, 10 => 45, 11 => 50, 12 => 55,
         13 => 60, 14 => 65, 15 => 70, 16 => 75, 17 => 80, 18 => 85, 19 => 90,
@@ -45,7 +42,6 @@ function quyDoiDiemReading($soCauDung) {
 
 function quyDoiDiemListening($soCauDung) {
     $bangDiem = [
-        // Dựa vào bảng bạn cung cấp
         0 => 5, 1 => 15, 2 => 20, 3 => 25, 4 => 30, 5 => 35, 6 => 40,
         7 => 45, 8 => 50, 9 => 55, 10 => 60, 11 => 70, 12 => 75, 13 => 80,
         14 => 85, 15 => 90, 16 => 95, 17 => 100, 18 => 105, 19 => 110,
@@ -66,47 +62,200 @@ function quyDoiDiemListening($soCauDung) {
     ];
     return $bangDiem[min(100, max(0, $soCauDung))];
 }
+
+// Hàm render câu hỏi với kết quả
+function renderQuestionWithResults($q, $cauSo, $detailed_results, $show_results) {
+    $qid = $q['question_id'];
+    $user_answer = $detailed_results[$qid]['user_answer'] ?? null;
+    $correct_answer = $detailed_results[$qid]['correct_answer'] ?? $q['correct_answer'];
+    $is_correct = $detailed_results[$qid]['is_correct'] ?? null;
+    
+    ob_start(); // Bắt đầu output buffering
+    ?>
+    <div class="question-container animate-fade-in">
+        <div class="d-flex align-items-start">
+            <div class="question-number"><?= $cauSo ?></div>
+            <div class="flex-grow-1">
+                <div class="question-text">
+                    <?= htmlspecialchars($q['content']) ?>
+                    <?php if ($show_results && $is_correct !== null): ?>
+                        <span class="correct-answer-indicator">
+                            <i class="fas fa-<?= $is_correct ? 'check' : 'times' ?>"></i>
+                            <?= $is_correct ? 'Đúng' : 'Sai' ?>
+                        </span>
+                    <?php endif; ?>
+                </div>
+                <div class="option-group">
+                    <?php foreach (['A','B','C','D'] as $i => $opt): 
+                        $is_user_choice = ($user_answer === $opt);
+                        $is_correct_choice = ($correct_answer === $opt);
+                        
+                        $option_class = '';
+                        if ($show_results) {
+                            if ($is_correct_choice && $is_user_choice) {
+                                // Đáp án đúng và được chọn - màu xanh
+                                $option_class = 'result-option correct';
+                            } elseif ($is_correct_choice && !$is_user_choice) {
+                                // Đáp án đúng nhưng không được chọn - màu vàng
+                                $option_class = 'result-option correct-not-selected';
+                            } elseif ($is_user_choice && !$is_correct_choice) {
+                                // Đáp án sai được chọn - màu đỏ
+                                $option_class = 'result-option incorrect';
+                            } else {
+                                // Đáp án không được chọn - mờ đi
+                                $option_class = 'result-option not-selected';
+                            }
+                        }
+                    ?>
+                        <div class="option-item">
+                            <input type="radio" 
+                                   name="<?= $q['question_id'] ?>" 
+                                   value="<?= $opt ?>" 
+                                   id="q<?= $q['question_id'] . $opt ?>" 
+                                   <?= $show_results ? 'disabled' : 'disabled' ?>
+                                   <?= $is_user_choice ? 'checked' : '' ?>>
+                            <label class="option-label <?= $option_class ?>" for="q<?= $q['question_id'] . $opt ?>">
+                                <div class="option-letter"><?= $opt ?></div>
+                                <div><?= htmlspecialchars($q["option_" . ($i + 1)]) ?></div>
+                                <?php if ($show_results): ?>
+                                    <?php if ($is_correct_choice && $is_user_choice): ?>
+                                        <div class="result-icon correct">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                    <?php elseif ($is_correct_choice && !$is_user_choice): ?>
+                                        <div class="result-icon" style="color: #f59e0b;">
+                                            <i class="fas fa-exclamation-circle"></i>
+                                        </div>
+                                    <?php elseif ($is_user_choice && !$is_correct_choice): ?>
+                                        <div class="result-icon incorrect">
+                                            <i class="fas fa-times-circle"></i>
+                                        </div>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                            </label>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+                
+                <?php if ($show_results && $is_correct !== null): ?>
+                    <div class="question-result-summary <?= $is_correct ? 'correct' : 'incorrect' ?>">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="fas fa-<?= $is_correct ? 'check-circle' : 'times-circle' ?> 
+                               text-<?= $is_correct ? 'success' : 'danger' ?>"></i>
+                            <strong>
+                                <?php if ($is_correct): ?>
+                                    Chính xác! Bạn đã chọn đáp án đúng.
+                                <?php else: ?>
+                                    Bạn đã chọn: <?= $user_answer ?> | Đáp án đúng: <?= $correct_answer ?>
+                                <?php endif; ?>
+                            </strong>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+    <?php
+    return ob_get_clean(); // Trả về nội dung đã buffer
+}
+
 // CHẤM ĐIỂM
 $ketQua = "";
+// Lưu trữ kết quả chấm điểm chi tiết
+$detailed_results = [];
+$show_results = false;
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $soCauDung = 0;
+    $soCauDungListening = 0;
+    $soCauDungReading = 0;
+    $tongCauListening = 0;
+    $tongCauReading = 0;
 
-    // Lấy tổng số câu trong đề thi
-    $tong_sql = "SELECT COUNT(*) AS total FROM exam_question WHERE exam_id = $exam_id";
-    $tong_result = mysqli_query($conn, $tong_sql);
-    $tong_row = mysqli_fetch_assoc($tong_result);
-    $tongCau = (int)($tong_row['total'] ?? 0);
+    // Đếm tổng số câu theo từng loại
+    if ($exam['type'] === 'Full') {
+        // Đếm câu Listening
+        $listening_count_sql = "SELECT COUNT(*) AS total FROM exam_question WHERE exam_id = $exam_id AND listening_id IS NOT NULL";
+        $listening_count_result = mysqli_query($conn, $listening_count_sql);
+        $listening_count_row = mysqli_fetch_assoc($listening_count_result);
+        $tongCauListening = (int)($listening_count_row['total'] ?? 0);
 
-    foreach ($_POST as $qid => $traloi) {
-    if (!is_numeric($qid)) continue;
-    $qid = (int)$qid;
-    $traloi = mysqli_real_escape_string($conn, $traloi);
-
-    $sql = "SELECT correct_answer FROM exam_question WHERE question_id = $qid";
-    $res = mysqli_query($conn, $sql);
-    $row = mysqli_fetch_assoc($res);
-    if ($row && strtoupper($row['correct_answer']) === strtoupper($traloi)) {
-        $soCauDung++;
-    }
-}
-     $reading_score = null;
-    $listening_score = null;
-
-    if ($exam['type'] === 'Reading') {
-        $reading_score = quyDoiDiemReading($soCauDung);
-        $total_score = $reading_score;
+        // Đếm câu Reading
+        $reading_count_sql = "SELECT COUNT(*) AS total FROM exam_question WHERE exam_id = $exam_id AND (passage_id IS NOT NULL OR (listening_id IS NULL AND passage_id IS NULL))";
+        $reading_count_result = mysqli_query($conn, $reading_count_sql);
+        $reading_count_row = mysqli_fetch_assoc($reading_count_result);
+        $tongCauReading = (int)($reading_count_row['total'] ?? 0);
     } else {
-        $listening_score = quyDoiDiemListening($soCauDung);
-        $total_score = $listening_score;
+        // Đếm tổng số câu cho bài thi đơn lẻ
+        $tong_sql = "SELECT COUNT(*) AS total FROM exam_question WHERE exam_id = $exam_id";
+        $tong_result = mysqli_query($conn, $tong_sql);
+        $tong_row = mysqli_fetch_assoc($tong_result);
+        if ($exam['type'] === 'Reading') {
+            $tongCauReading = (int)($tong_row['total'] ?? 0);
+        } else {
+            $tongCauListening = (int)($tong_row['total'] ?? 0);
+        }
     }
 
-    $ketQua = "🎯 Bạn đã làm đúng <strong>$soCauDung / $tongCau</strong> câu hỏi!<br>";
-    if ($reading_score !== null) {
+    // Chấm điểm từng câu và lưu kết quả chi tiết
+    foreach ($_POST as $qid => $traloi) {
+        if (!is_numeric($qid)) continue;
+        $qid = (int)$qid;
+        $traloi = mysqli_real_escape_string($conn, $traloi);
+
+        $sql = "SELECT correct_answer, listening_id, passage_id FROM exam_question WHERE question_id = $qid";
+        $res = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_assoc($res);
+        
+        if ($row) {
+            $is_correct = strtoupper($row['correct_answer']) === strtoupper($traloi);
+            
+            // Lưu kết quả chi tiết
+            $detailed_results[$qid] = [
+                'user_answer' => $traloi,
+                'correct_answer' => $row['correct_answer'],
+                'is_correct' => $is_correct
+            ];
+            
+            if ($is_correct) {
+                // Phân loại câu đúng theo Listening hoặc Reading
+                if (!empty($row['listening_id'])) {
+                    $soCauDungListening++;
+                } else {
+                    $soCauDungReading++;
+                }
+            }
+        }
+    }
+
+    $show_results = true;
+
+    // Tính điểm theo loại bài thi
+    $reading_score = null;
+    $listening_score = null;
+    $total_score = 0;
+
+    if ($exam['type'] === 'Full') {
+        $reading_score = quyDoiDiemReading($soCauDungReading);
+        $listening_score = quyDoiDiemListening($soCauDungListening);
+        $total_score = $reading_score + $listening_score;
+        
+        $ketQua = "🎯 <strong>Kết quả bài thi Full TOEIC:</strong><br>";
+        $ketQua .= "🎧 Listening: <strong>$soCauDungListening / $tongCauListening</strong> câu đúng - Điểm: <strong>$listening_score</strong><br>";
+        $ketQua .= "📘 Reading: <strong>$soCauDungReading / $tongCauReading</strong> câu đúng - Điểm: <strong>$reading_score</strong><br>";
+        $ketQua .= "🏆 <strong>Tổng điểm TOEIC: $total_score / 990</strong>";
+    } elseif ($exam['type'] === 'Reading') {
+        $reading_score = quyDoiDiemReading($soCauDungReading);
+        $total_score = $reading_score;
+        $ketQua = "🎯 Bạn đã làm đúng <strong>$soCauDungReading / $tongCauReading</strong> câu hỏi!<br>";
         $ketQua .= "📘 Điểm Reading (quy đổi): <strong>$reading_score</strong>";
     } else {
+        $listening_score = quyDoiDiemListening($soCauDungListening);
+        $total_score = $listening_score;
+        $ketQua = "🎯 Bạn đã làm đúng <strong>$soCauDungListening / $tongCauListening</strong> câu hỏi!<br>";
         $ketQua .= "🎧 Điểm Listening (quy đổi): <strong>$listening_score</strong>";
     }
 
+    // Lưu kết quả vào database
     if (isset($_SESSION['user_id'])) {
         $user_id = $_SESSION['user_id'];
         $date = date('Y-m-d');
@@ -118,9 +267,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// Lấy passage nếu là Reading
+// Lấy dữ liệu cho bài thi
 $passages = [];
-if ($exam['type'] === 'Reading') {
+$listenings = [];
+$questions = [];
+
+// Lấy passages cho Reading
+if ($exam['type'] === 'Reading' || $exam['type'] === 'Full') {
     $passage_sql = "SELECT * FROM reading_passage WHERE exam_id = $exam_id";
     $passage_result = mysqli_query($conn, $passage_sql);
     while ($row = mysqli_fetch_assoc($passage_result)) {
@@ -128,30 +281,8 @@ if ($exam['type'] === 'Reading') {
     }
 }
 
-// Lấy câu hỏi
-$question_sql = "SELECT * FROM exam_question WHERE exam_id = $exam_id ORDER BY passage_id ASC, question_id ASC";
-$question_result = mysqli_query($conn, $question_sql);
-$questions = [];
-while ($row = mysqli_fetch_assoc($question_result)) {
-    $questions[] = $row;
-}
-
-// Gom nhóm câu hỏi
-$grouped_questions = [];
-$no_passage_questions = [];
-foreach ($questions as $q) {
-    if ($q['passage_id']) {
-        $grouped_questions[$q['passage_id']][] = $q;
-    } else {
-        $no_passage_questions[] = $q;
-    }
-}
-// Lấy listening
-$listenings = [];
-$grouped_listening_questions = [];
-$no_listening_questions = [];
-
-if ($exam['type'] === 'Listening') {
+// Lấy listenings cho Listening
+if ($exam['type'] === 'Listening' || $exam['type'] === 'Full') {
     $lsql = "SELECT * FROM listening WHERE exam_id = $exam_id";
     $lresult = mysqli_query($conn, $lsql);
     while ($row = mysqli_fetch_assoc($lresult)) {
@@ -160,10 +291,29 @@ if ($exam['type'] === 'Listening') {
             'audio_url' => $row['audio_url']
         ];
     }
+}
 
-    foreach ($questions as $q) {
-        if (!empty($q['listening_id'])) {
-            $grouped_listening_questions[$q['listening_id']][] = $q;
+// Lấy câu hỏi
+$question_sql = "SELECT * FROM exam_question WHERE exam_id = $exam_id ORDER BY listening_id ASC, passage_id ASC, question_id ASC";
+$question_result = mysqli_query($conn, $question_sql);
+while ($row = mysqli_fetch_assoc($question_result)) {
+    $questions[] = $row;
+}
+
+// Gom nhóm câu hỏi
+$grouped_questions = [];
+$grouped_listening_questions = [];
+$no_passage_questions = [];
+$no_listening_questions = [];
+
+foreach ($questions as $q) {
+    if (!empty($q['listening_id'])) {
+        $grouped_listening_questions[$q['listening_id']][] = $q;
+    } elseif (!empty($q['passage_id'])) {
+        $grouped_questions[$q['passage_id']][] = $q;
+    } else {
+        if ($exam['type'] === 'Reading' || ($exam['type'] === 'Full' && empty($q['listening_id']))) {
+            $no_passage_questions[] = $q;
         } else {
             $no_listening_questions[] = $q;
         }
@@ -175,47 +325,724 @@ if ($exam['type'] === 'Listening') {
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chi tiết bài thi: <?= htmlspecialchars($exam['title']) ?></title>
+    
+    <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Animate.css -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <!-- Thêm vào phần head -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
     <style>
-        .question-block { margin-bottom: 25px; }
-        .passage-block { margin-top: 40px; padding: 20px; background-color: #f3f3f3; border-radius: 10px; }
-    </style>
-     <!-- Icon IUH - hiển thị trên thanh tác vụ webweb-->
-    <link href="public/img/logoiuh.png" rel="icon">
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --success-color: #059669;
+            --warning-color: #d97706;
+            --danger-color: #dc2626;
+            --info-color: #0891b2;
+            --light-bg: #f8fafc;
+            --dark-text: #1e293b;
+            --gray-text: #64748b;
+            --border-color: #e2e8f0;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
 
-    <!-- Google Web Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    <!-- Icon Font Stylesheet -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.10.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: var(--dark-text);
+        }
 
-    <!-- Libraries Stylesheet -->
-    <link href="../public/libs/animate/animate.min.css" rel="stylesheet">
-    <link href="../public/libs/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+        /* Header Styles */
+        .exam-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
 
-    <!-- Customized Bootstrap Stylesheet -->
-    <link href="../public/css/bootstrap.min.css" rel="stylesheet">
+        .exam-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="white" opacity="0.1"><polygon points="1000,100 1000,0 0,100"/></svg>');
+            background-size: cover;
+        }
 
-    <!-- Template Stylesheet -->
-    <link href="../public/css/style.css" rel="stylesheet">
+        .exam-header .container {
+            position: relative;
+            z-index: 2;
+        }
+
+        .exam-title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .exam-meta {
+            display: flex;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+
+        .exam-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Main Content */
+        .main-content {
+            background: white;
+            margin-top: -50px;
+            border-radius: 20px 20px 0 0;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            z-index: 3;
+            min-height: calc(100vh - 200px);
+        }
+
+        .content-wrapper {
+            padding: 3rem 2rem;
+        }
+
+        /* Timer Styles */
+        .timer-container {
+            position: sticky;
+            top: 20px;
+            z-index: 1000;
+            margin-bottom: 2rem;
+        }
+
+        .timer-card {
+            background: linear-gradient(135deg, var(--danger-color), #ef4444);
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow-lg);
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        .timer-display {
+            font-size: 2rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-modern {
+            padding: 0.75rem 2rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-modern:hover::before {
+            left: 100%;
+        }
+
+        .btn-start {
+            background: linear-gradient(135deg, var(--success-color), #10b981);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-start:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+            color: white;
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Section Headers */
+        .section-header {
+            background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+            border-left: 5px solid var(--primary-color);
+            padding: 1.5rem 2rem;
+            margin: 3rem 0 2rem 0;
+            border-radius: 0 15px 15px 0;
+            box-shadow: var(--shadow-md);
+            position: relative;
+        }
+
+        .section-header.listening {
+            border-left-color: var(--info-color);
+            background: linear-gradient(135deg, #ecfeff, #cffafe);
+        }
+
+        .section-header.reading {
+            border-left-color: var(--success-color);
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .section-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .section-icon.listening {
+            background: linear-gradient(135deg, var(--info-color), #06b6d4);
+        }
+
+        .section-icon.reading {
+            background: linear-gradient(135deg, var(--success-color), #10b981);
+        }
+
+        /* Question Blocks */
+        .question-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-md);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .question-container:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .question-number {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+            box-shadow: var(--shadow-md);
+        }
+
+        .question-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 1.5rem;
+            line-height: 1.6;
+        }
+
+        /* Custom Radio Buttons */
+        .option-group {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .option-item {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .option-item input[type="radio"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            background: var(--light-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        .option-label:hover {
+            background: #e0f2fe;
+            border-color: var(--info-color);
+            transform: translateX(5px);
+        }
+
+        .option-item input[type="radio"]:checked + .option-label {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .option-letter {
+            background: var(--primary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            margin-right: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .option-item input[type="radio"]:checked + .option-label .option-letter {
+            background: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        /* Passage Styles */
+        .passage-container {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-left: 5px solid var(--success-color);
+            box-shadow: var(--shadow-md);
+        }
+
+        .passage-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .passage-icon {
+            background: linear-gradient(135deg, var(--success-color), #10b981);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .passage-content {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: var(--dark-text);
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Audio Player Styles */
+        .audio-container {
+            background: linear-gradient(135deg, #ecfeff, #cffafe);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            border-left: 5px solid var(--info-color);
+            box-shadow: var(--shadow-md);
+        }
+
+        .audio-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .audio-icon {
+            background: linear-gradient(135deg, var(--info-color), #06b6d4);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .audio-player {
+            width: 100%;
+            height: 60px;
+            border-radius: 12px;
+            background: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* Result Styles */
+        .result-container {
+            background: linear-gradient(135deg, #ecfdf5, #d1fae5);
+            border: 2px solid var(--success-color);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .result-icon {
+            font-size: 4rem;
+            color: var(--success-color);
+            margin-bottom: 1rem;
+        }
+
+        .result-text {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+
+        /* Alert Styles */
+        .alert-modern {
+            border: none;
+            border-radius: 15px;
+            padding: 1.5rem 2rem;
+            margin: 2rem 0;
+            box-shadow: var(--shadow-md);
+            border-left: 5px solid;
+        }
+
+        .alert-info {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+            border-left-color: var(--info-color);
+            color: #1e40af;
+        }
+
+        .alert-warning {
+            background: linear-gradient(135deg, #fef3c7, #fde68a);
+            border-left-color: var(--warning-color);
+            color: #92400e;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            position: sticky;
+            top: 100px;
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+            z-index: 999;
+        }
+
+        .progress-bar-custom {
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--info-color));
+            border-radius: 10px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .exam-title {
+                font-size: 2rem;
+            }
+            
+            .exam-meta {
+                gap: 1rem;
+            }
+            
+            .content-wrapper {
+                padding: 2rem 1rem;
+            }
+            
+            .timer-display {
+                font-size: 1.5rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn-modern {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        /* Navbar Styles */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .navbar-brand h2 {
+            background: linear-gradient(135deg, var(--primary-color), var(--info-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Footer Styles */
+        .footer {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            margin-top: 0;
+        }
+
+/* Result Display Styles */
+.result-option {
+    position: relative;
+}
+
+.result-option.correct {
+    background: linear-gradient(135deg, #dcfce7, #bbf7d0) !important;
+    border-color: #16a34a !important;
+    color: #15803d !important;
+}
+
+.result-option.incorrect {
+    background: linear-gradient(135deg, #fef2f2, #fecaca) !important;
+    border-color: #dc2626 !important;
+    color: #dc2626 !important;
+}
+
+.result-option.not-selected {
+    opacity: 0.6;
+}
+
+.result-icon {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.result-icon.correct {
+    color: #16a34a;
+}
+
+.result-icon.incorrect {
+    color: #dc2626;
+}
+
+.correct-answer-indicator {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.question-result-summary {
+    background: white;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-left: 4px solid;
+    box-shadow: var(--shadow-sm);
+}
+
+.question-result-summary.correct {
+    border-left-color: #16a34a;
+    background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+}
+
+.question-result-summary.incorrect {
+    border-left-color: #dc2626;
+    background: linear-gradient(135deg, #fef2f2, #fee2e2);
+}
+
+.results-legend {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.legend-color {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    color: white;
+}
+
+.legend-color.correct {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+}
+
+.legend-color.incorrect {
+    background: linear-gradient(135deg, #dc2626, #ef4444);
+}
+
+.legend-color.not-answered {
+    background: linear-gradient(135deg, #6b7280, #9ca3af);
+}
+
+.results-summary-card {
+    background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+    border-radius: 15px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+}
+
+.summary-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.stat-item {
+    background: white;
+    padding: 1rem;
+    border-radius: 10px;
+    box-shadow: var(--shadow-sm);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.stat-number.correct {
+    color: #16a34a;
+}
+
+.stat-number.incorrect {
+    color: #dc2626;
+}
+
+.stat-number.total {
+    color: var(--primary-color);
+}
+\`\`\`
+
+</style>
 </head>
 <body>
- <!-- Spinner Start 
-    <div id="spinner" class="show bg-white position-fixed translate-middle w-100 vh-100 top-50 start-50 d-flex align-items-center justify-content-center">
-        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-            <span class="sr-only">Loading...</span>
-        </div>
-    </div>
-    Spinner End -->
-
-
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
-        <a href="../index.php" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
+        <a href="index.php" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
             <h2 class="m-0 text-primary"><i class="fa fa-book me-3">2NToeicLab</i></h2>
         </a>
         <button type="button" class="navbar-toggler me-4" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
@@ -226,7 +1053,7 @@ if ($exam['type'] === 'Listening') {
                 <a href="../index.php" class="nav-item nav-link active">Trang chủ</a>
                 <a href="./about.php" class="nav-item nav-link">Về chúng tôi</a>
                 <div class="nav-item dropdown">
-                    <a href="./practice.php" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Luyện tập</a>
+                    <a href="templates/practice.php" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Luyện tập</a>
                     <div class="dropdown-menu fade-down m-0">
                         <a href="./listening.php" class="dropdown-item">Nghe</a>
                         <a href="./reading.php" class="dropdown-item">Đọc</a>
@@ -240,121 +1067,387 @@ if ($exam['type'] === 'Listening') {
                         <?= explode('@', $_SESSION["user_email"])[0] ?>
                     </a>
                     <div class="dropdown-menu dropdown-menu-end">
-                        <a href="profile.php" class="dropdown-item">Sửa thông tin</a>
-                        <a href="logout.php" class="dropdown-item text-danger">Đăng xuất</a>
-                       <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
+                        <a href="./profile.php" class="dropdown-item">Sửa thông tin</a>
+                        <a href="./logout.php" class="dropdown-item text-danger">Đăng xuất</a>
+                        <a href="./exam_history.php" class="dropdown-item"><i class="fas fa-history me-2"></i>Lịch sử bài thi</a>
+                        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                         <div class="dropdown-divider"></div>
                             <a href="../admin/exam_manage.php" class="dropdown-item">Quản lý bài thi</a>
                             <a href="../admin/user_manage.php" class="dropdown-item">Quản lý người dùng</a>
                         <?php endif; ?>
                     </div>
-                </div>
+                </div> 
             <?php else: ?>
-                <a href="login.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Đăng nhập<i class="fa fa-arrow-right ms-3"></i></a>
+                <a href="./login.php" class="btn btn-primary py-4 px-lg-5 d-none d-lg-block">Đăng nhập<i class="fa fa-arrow-right ms-3"></i></a>
             <?php endif; ?>
         </div>
     </nav>
     <!-- Navbar End -->
-  <div class="container py-4">
-    <h2 class="mb-3">Chi tiết bài thi: <?= htmlspecialchars($exam['title']) ?></h2>
-    <p><strong>Loại:</strong> <?= $exam['type'] ?> | <strong>Thời gian:</strong> <?= $exam['duration_minutes'] ?> phút</p>
-    <hr>
 
-    <?php if ($ketQua): ?>
-        <div class="alert alert-success text-center"><?= $ketQua ?></div>
-    <?php endif; ?>
+    <!-- Exam Header -->
+    <div class="exam-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1 class="exam-title animate__animated animate__fadeInDown">
+                        <?= htmlspecialchars($exam['title']) ?>
+                    </h1>
+                    <div class="exam-meta animate__animated animate__fadeInUp">
+                        <div class="exam-meta-item">
+                            <i class="fas fa-tag"></i>
+                            <span><?= $exam['type'] ?></span>
+                        </div>
+                        <div class="exam-meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span><?= $exam['duration_minutes'] ?> phút</span>
+                        </div>
+                        <div class="exam-meta-item">
+                            <i class="fas fa-signal"></i>
+                            <span>Độ khó: <?= $exam['difficulty_level'] ?></span>
+                        </div>
+                    </div>
+                    
+                    <?php if ($exam['type'] === 'Full'): ?>
+                        <div class="alert alert-info alert-modern animate__animated animate__fadeInUp">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>Bài thi Full TOEIC</strong> - Bao gồm cả phần Listening và Reading
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <?php if (!isset($_SESSION['user_id'])): ?>
-    <div class="alert alert-warning">⚠️ Vui lòng <a href="login.php">đăng nhập</a> để làm bài thi.</div>
-<?php else: ?>
-    <button id="startExamBtn" class="btn btn-success mb-4">🎯 Làm bài thi</button>
-<?php endif; ?>
-   <!-- Thời gian làm bài -->
-<div id="countdown-timer" class="mb-4 fs-5 fw-bold text-danger" style="display: none;">
-    ⏳ Thời gian còn lại: <span id="timer">--:--</span>
-</div>
-    <form method="POST" id="submitForm">
-        <button type="submit" class="btn btn-primary mb-4 d-none" id="submitExamBtn">📝 Nộp bài</button>
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="container">
+            <div class="content-wrapper">
+                
+                <!-- Result Display -->
+                <?php if ($ketQua): ?>
+                    <div class="result-container animate__animated animate__bounceIn">
+                        <div class="result-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="result-text"><?= $ketQua ?></div>
+                    </div>
+                <?php endif; ?>
 
-        <?php $cauSo = 1; ?>
+                <!-- Login Warning -->
+                <?php if (!isset($_SESSION['user_id'])): ?>
+                    <div class="alert alert-warning alert-modern">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Vui lòng <a href="login.php" class="fw-bold">đăng nhập</a> để làm bài thi và lưu kết quả.
+                    </div>
+                <?php endif; ?>
 
-        <?php if ($exam['type'] === 'Reading'): ?>
-            <?php if (!empty($no_passage_questions)): ?>
-                <h4 class="mt-4">Câu hỏi không gắn đoạn văn</h4>
-                <?php foreach ($no_passage_questions as $q): ?>
-                    <div class="question-block">
-                        <strong>Câu <?= $cauSo++ ?>:</strong> <?= htmlspecialchars($q['content']) ?>
-                        <?php foreach (['A','B','C','D'] as $i => $opt): ?>
-                            <div class="form-check">
-                                <input class="form-check-input" disabled type="radio" name="<?= $q['question_id'] ?>" value="<?= $opt ?>" id="q<?= $q['question_id'] . $opt ?>">
-                                <label class="form-check-label" for="q<?= $q['question_id'] . $opt ?>">
-                                    <?= $opt ?>. <?= htmlspecialchars($q["option_" . ($i + 1)]) ?>
-                                </label>
+                <!-- Timer -->
+                <div id="countdown-timer" class="timer-container" style="display: none;">
+                    <div class="timer-card">
+                        <div class="d-flex align-items-center justify-content-center gap-3">
+                            <i class="fas fa-stopwatch fa-2x"></i>
+                            <div>
+                                <div class="fw-bold">Thời gian còn lại</div>
+                                <div id="timer" class="timer-display">--:--</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div id="progress-container" class="progress-container" style="display: none;">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="fw-bold">Tiến độ làm bài</span>
+                        <span id="progress-text">0%</span>
+                    </div>
+                    <div class="progress-bar-custom">
+                        <div id="progress-fill" class="progress-fill"></div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <?php if (isset($_SESSION['user_id'])): ?>
+                        <button id="startExamBtn" class="btn btn-modern btn-start">
+                            <i class="fas fa-play me-2"></i>Bắt đầu làm bài
+                        </button>
+                    <?php endif; ?>
+                </div>
+
+                <!-- Exam Form -->
+                <form method="POST" id="submitForm">
+                    <button type="submit" class="btn btn-modern btn-submit d-none" id="submitExamBtn">
+                        <i class="fas fa-paper-plane me-2"></i>Nộp bài thi
+                    </button>
+
+                    <?php $cauSo = 1; ?>
+
+                    <?php if ($exam['type'] === 'Full'): ?>
+                        <!-- PHẦN LISTENING -->
+                        <div class="section-header listening animate-fade-in">
+                            <div class="section-title">
+                                <div class="section-icon listening">
+                                    <i class="fas fa-headphones"></i>
+                                </div>
+                                <div>
+                                    <h2 class="mb-0">PHẦN I: LISTENING COMPREHENSION</h2>
+                                    <small class="text-muted">Phần nghe hiểu</small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <?php foreach ($listenings as $lid => $info): ?>
+                            <div class="audio-container animate-fade-in">
+                                <div class="audio-header">
+                                    <div class="audio-icon">
+                                        <i class="fas fa-volume-up"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Đoạn nghe</h5>
+                                        <small class="text-muted">Nghe và trả lời các câu hỏi</small>
+                                    </div>
+                                </div>
+                                <p class="mb-3"><?= nl2br(htmlspecialchars($info['content'])) ?></p>
+                                <audio controls class="audio-player">
+                                    <source src="../public/<?= htmlspecialchars($info['audio_url']) ?>" type="audio/mpeg">
+                                    Trình duyệt của bạn không hỗ trợ phát audio.
+                                </audio>
+                                
+                                <?php foreach ($grouped_listening_questions[$lid] ?? [] as $q): ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                <?php endforeach; ?>
                             </div>
                         <?php endforeach; ?>
+
+                        <!-- PHẦN READING -->
+                        <div class="section-header reading animate-fade-in">
+                            <div class="section-title">
+                                <div class="section-icon reading">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <div>
+                                    <h2 class="mb-0">PHẦN II: READING COMPREHENSION</h2>
+                                    <small class="text-muted">Phần đọc hiểu</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php if (!empty($no_passage_questions)): ?>
+                            <div class="passage-container animate-fade-in">
+                                <div class="passage-header">
+                                    <div class="passage-icon">
+                                        <i class="fas fa-spell-check"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Ngữ pháp và từ vựng</h5>
+                                        <small class="text-muted">Chọn đáp án đúng nhất</small>
+                                    </div>
+                                </div>
+                                <?php foreach ($no_passage_questions as $q): ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php foreach ($passages as $pid => $content): ?>
+                            <div class="passage-container animate-fade-in">
+                                <div class="passage-header">
+                                    <div class="passage-icon">
+                                        <i class="fas fa-file-text"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Đoạn văn</h5>
+                                        <small class="text-muted">Đọc đoạn văn và trả lời câu hỏi</small>
+                                    </div>
+                                </div>
+                                <div class="passage-content">
+                                    <?= nl2br(htmlspecialchars($content)) ?>
+                                </div>
+                                <?php foreach ($grouped_questions[$pid] ?? [] as $q): ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endforeach; ?>
+
+                    <?php elseif ($exam['type'] === 'Reading'): ?>
+                        <div class="section-header reading animate-fade-in">
+                            <div class="section-title">
+                                <div class="section-icon reading">
+                                    <i class="fas fa-book-open"></i>
+                                </div>
+                                <div>
+                                    <h2 class="mb-0">READING COMPREHENSION</h2>
+                                    <small class="text-muted">Phần đọc hiểu</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php if (!empty($no_passage_questions)): ?>
+                            <div class="passage-container animate-fade-in">
+                                <div class="passage-header">
+                                    <div class="passage-icon">
+                                        <i class="fas fa-spell-check"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Ngữ pháp và từ vựng</h5>
+                                        <small class="text-muted">Chọn đáp án đúng nhất</small>
+                                    </div>
+                                </div>
+                                <?php foreach ($no_passage_questions as $q): ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php foreach ($passages as $pid => $content): ?>
+                            <div class="passage-container animate-fade-in">
+                                <div class="passage-header">
+                                    <div class="passage-icon">
+                                        <i class="fas fa-file-text"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Đoạn văn</h5>
+                                        <small class="text-muted">Đọc đoạn văn và trả lời câu hỏi</small>
+                                    </div>
+                                </div>
+                                <div class="passage-content">
+                                    <?= nl2br(htmlspecialchars($content)) ?>
+                                </div>
+                                <?php foreach ($grouped_questions[$pid] ?? [] as $q): ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endforeach; ?>
+
+                    <?php elseif ($exam['type'] === 'Listening'): ?>
+                        <div class="section-header listening animate-fade-in">
+                            <div class="section-title">
+                                <div class="section-icon listening">
+                                    <i class="fas fa-headphones"></i>
+                                </div>
+                                <div>
+                                    <h2 class="mb-0">LISTENING COMPREHENSION</h2>
+                                    <small class="text-muted">Phần nghe hiểu</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php foreach ($listenings as $lid => $info): ?>
+                            <div class="audio-container animate-fade-in">
+                                <div class="audio-header">
+                                    <div class="audio-icon">
+                                        <i class="fas fa-volume-up"></i>
+                                    </div>
+                                    <div>
+                                        <h5 class="mb-1">Đoạn nghe</h5>
+                                        <small class="text-muted">Nghe và trả lời các câu hỏi</small>
+                                    </div>
+                                </div>
+                                <p class="mb-3"><?= nl2br(htmlspecialchars($info['content'])) ?></p>
+                                <audio controls class="audio-player">
+                                    <source src="../public/<?= htmlspecialchars($info['audio_url']) ?>" type="audio/mpeg">
+                                    Trình duyệt của bạn không hỗ trợ phát audio.
+                                </audio>
+                                
+                                <?php foreach ($grouped_listening_questions[$lid] ?? [] as $q): ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+
+                    <div class="text-center mt-5">
+                        <button type="submit" class="btn btn-modern btn-submit btn-lg">
+                            <i class="fas fa-paper-plane me-2"></i>Nộp bài thi
+                        </button>
                     </div>
-                <?php endforeach; ?>
-            <?php endif; ?>
-
-            <?php foreach ($passages as $pid => $content): ?>
-                <div class="passage-block bg-light p-3 my-4 rounded">
-                    <p><?= nl2br(htmlspecialchars($content)) ?></p>
-                    <?php foreach ($grouped_questions[$pid] ?? [] as $q): ?>
-                        <div class="question-block">
-                            <strong>Câu <?= $cauSo++ ?>:</strong> <?= htmlspecialchars($q['content']) ?>
-                            <?php foreach (['A','B','C','D'] as $i => $opt): ?>
-                                <div class="form-check">
-                                    <input class="form-check-input" disabled type="radio" name="<?= $q['question_id'] ?>" value="<?= $opt ?>" id="q<?= $q['question_id'] . $opt ?>">
-                                    <label class="form-check-label" for="q<?= $q['question_id'] . $opt ?>">
-                                        <?= $opt ?>. <?= htmlspecialchars($q["option_" . ($i + 1)]) ?>
-                                    </label>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endforeach; ?>
+                </form>
+                <?php if ($show_results): ?>
+    <!-- Results Legend -->
+    <div class="results-legend animate__animated animate__fadeInUp">
+        <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Chú thích kết quả</h5>
+        <div class="row">
+            <div class="col-md-3">
+                <div class="legend-item">
+                    <div class="legend-color correct">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <span>Đáp án đúng bạn chọn</span>
                 </div>
-            <?php endforeach; ?>
-
-        <?php else: ?>
-            <?php foreach ($listenings as $lid => $info): ?>
-                <div class="p-3 my-4 bg-light rounded">
-                    <p><strong>Đoạn nghe:</strong> <?= nl2br(htmlspecialchars($info['content'])) ?></p>
-                    <audio controls>
-                        <source src="../public/<?= htmlspecialchars($info['audio_url']) ?>" type="audio/mpeg">
-                        Trình duyệt của bạn không hỗ trợ phát audio.
-                    </audio>
-                    <?php foreach ($grouped_listening_questions[$lid] ?? [] as $q): ?>
-                        <div class="question-block mt-3">
-                            <strong>Câu <?= $cauSo++ ?>:</strong> <?= htmlspecialchars($q['content']) ?>
-                            <?php foreach (['A','B','C','D'] as $i => $opt): ?>
-                                <div class="form-check">
-                                    <input class="form-check-input" disabled type="radio" name="<?= $q['question_id'] ?>" value="<?= $opt ?>" id="q<?= $q['question_id'] . $opt ?>">
-                                    <label class="form-check-label" for="q<?= $q['question_id'] . $opt ?>">
-                                        <?= $opt ?>. <?= htmlspecialchars($q["option_" . ($i + 1)]) ?>
-                                    </label>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endforeach; ?>
+            </div>
+            <div class="col-md-3">
+                <div class="legend-item">
+                    <div class="legend-color correct-not-selected">
+                        <i class="fas fa-exclamation"></i>
+                    </div>
+                    <span>Đáp án đúng bạn bỏ lỡ</span>
                 </div>
-            <?php endforeach; ?>
-        <?php endif; ?>
+            </div>
+            <div class="col-md-3">
+                <div class="legend-item">
+                    <div class="legend-color incorrect">
+                        <i class="fas fa-times"></i>
+                    </div>
+                    <span>Đáp án bạn chọn sai</span>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="legend-item">
+                    <div class="legend-color not-answered">
+                        <i class="fas fa-minus"></i>
+                    </div>
+                    <span>Đáp án không được chọn</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
-        <button type="submit" class="btn btn-primary mt-4">📝 Nộp bài</button>
-    </form>
-</div>
+    <!-- Detailed Summary -->
+    <div class="results-summary-card animate__animated animate__fadeInUp">
+        <h4 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Thống kê chi tiết</h4>
+        <div class="summary-stats">
+            <?php 
+            $total_questions = count($detailed_results);
+            $correct_count = array_sum(array_column($detailed_results, 'is_correct'));
+            $incorrect_count = $total_questions - $correct_count;
+            $accuracy = $total_questions > 0 ? round(($correct_count / $total_questions) * 100, 1) : 0;
+            ?>
+            <div class="stat-item">
+                <div class="stat-number total"><?= $total_questions ?></div>
+                <div class="stat-label">Tổng số câu</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number correct"><?= $correct_count ?></div>
+                <div class="stat-label">Câu đúng</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number incorrect"><?= $incorrect_count ?></div>
+                <div class="stat-label">Câu sai</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" style="color: <?= $accuracy >= 70 ? '#16a34a' : ($accuracy >= 50 ? '#d97706' : '#dc2626') ?>">
+                    <?= $accuracy ?>%
+                </div>
+                <div class="stat-label">Độ chính xác</div>
+            </div>
+        </div>
+    </div>
+<?php endif; ?>
+            </div>
+        </div>
+    </div>
 
-        <!-- Footer Start -->
-    <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
+    <!-- Footer Start -->
+    <div class="container-fluid bg-dark text-light footer pt-5 mt-0">
         <div class="container py-5">
             <div class="row g-5">
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-3">Menu</h4>
-                    <a class="btn btn-link" href="">Trang chủ</a>
-                    <a class="btn btn-link" href="">Về chúng tôi</a>
-                    <a class="btn btn-link" href="">Luyện tập kĩ năng nghe</a>
-                    <a class="btn btn-link" href="">Luyện tập kĩ năng đọc</a>
-                    <a class="btn btn-link" href="">Làm bài thi</a>
+                    <a class="btn btn-link text-light" href="">Trang chủ</a>
+                    <a class="btn btn-link text-light" href="">Về chúng tôi</a>
+                    <a class="btn btn-link text-light" href="">Luyện tập kĩ năng nghe</a>
+                    <a class="btn btn-link text-light" href="">Luyện tập kĩ năng đọc</a>
+                    <a class="btn btn-link text-light" href="">Làm bài thi</a>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-3">Liên hệ</h4>
@@ -381,8 +1474,6 @@ if ($exam['type'] === 'Listening') {
                 <div class="row">
                     <div class="col-md-12 text-center text-md-start mb-3 mb-md-0">
                         &copy; <a class="border-bottom" href="#">2N Toeic Lab - Hệ thống hỗ trợ luyện thi TOEIC 2 kỹ năng</a>, All Right Reserved.
-
-                        <!--/*** This template is free as long as you keep the footer author’s credit link/attribution link/backlink. If you'd like to use the template without the footer author’s credit link/attribution link/backlink, you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". Thank you for your support. ***/-->
                         Designed By <a class="border-bottom" href="https://htmlcodex.com">HTML Codex</a><br><br>
                         Distributed By <a class="border-bottom" href="https://themewagon.com">ThemeWagon</a>
                     </div>
@@ -392,70 +1483,303 @@ if ($exam['type'] === 'Listening') {
     </div>
     <!-- Footer End -->
 
-
     <!-- Back to Top -->
-    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top"><i class="bi bi-arrow-up"></i></a>
-
+    <a href="#" class="btn btn-lg btn-primary btn-lg-square back-to-top" id="backToTop">
+        <i class="bi bi-arrow-up"></i>
+    </a>
 
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="lib/wow/wow.min.js"></script>
-    <script src="lib/easing/easing.min.js"></script>
-    <script src="lib/waypoints/waypoints.min.js"></script>
-    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
 
-    <!-- Template Javascript -->
-    <script src="js/main.js"></script>
-    <!-- SCRIPT -->
     <script>
-        // Khi nhấn "Làm bài thi"
-        document.getElementById('startExamBtn').addEventListener('click', function () {
+        // Start Exam Function
+        document.getElementById('startExamBtn')?.addEventListener('click', function () {
+            // Hide start button, show submit button
             this.classList.add('d-none');
             document.getElementById('submitExamBtn').classList.remove('d-none');
 
-            // Gỡ disabled cho tất cả radio
+            // Enable all radio buttons
             document.querySelectorAll('input[type=radio]').forEach(input => {
                 input.disabled = false;
             });
+
+            // Show timer and progress
+            document.getElementById('countdown-timer').style.display = 'block';
+            document.getElementById('progress-container').style.display = 'block';
+
+            // Start countdown timer
+            let durationMinutes = <?= (int) $exam['duration_minutes'] ?>;
+            let remainingTime = durationMinutes * 60;
+            const totalTime = remainingTime;
+
+            const timerDisplay = document.getElementById('timer');
+            const timerInterval = setInterval(() => {
+                const minutes = Math.floor(remainingTime / 60);
+                const seconds = remainingTime % 60;
+                timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                remainingTime--;
+
+                // Update progress bar
+                const progress = ((totalTime - remainingTime) / totalTime) * 100;
+                document.getElementById('progress-fill').style.width = progress + '%';
+                document.getElementById('progress-text').textContent = Math.round(progress) + '%';
+
+                // Change timer color when time is running low
+                if (remainingTime < 300) { // Last 5 minutes
+                    timerDisplay.parentElement.parentElement.style.background = 'linear-gradient(135deg, #dc2626, #ef4444)';
+                }
+
+                if (remainingTime < 0) {
+                    clearInterval(timerInterval);
+                    timerDisplay.textContent = "00:00";
+                    alert("⏰ Thời gian của bạn đã hết. Bài thi sẽ được nộp tự động!");
+                    document.getElementById('submitForm').submit();
+                }
+            }, 1000);
+
+            // Add animation to question containers
+            const questionContainers = document.querySelectorAll('.question-container');
+            questionContainers.forEach((container, index) => {
+                setTimeout(() => {
+                    container.classList.add('animate__animated', 'animate__fadeInUp');
+                }, index * 100);
+            });
+
+            // Smooth scroll to first question
+            setTimeout(() => {
+                const firstQuestion = document.querySelector('.question-container');
+                if (firstQuestion) {
+                    firstQuestion.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }, 500);
         });
 
-        
-    </script>
-    <script>
-    document.getElementById('startExamBtn').addEventListener('click', function () {
-        // Hiện nút nộp bài
-        this.classList.add('d-none');
-        document.getElementById('submitExamBtn').classList.remove('d-none');
-
-        // Kích hoạt chọn đáp án
-        document.querySelectorAll('input[type=radio]').forEach(input => {
-            input.disabled = false;
-        });
-
-        // Hiển thị đồng hồ đếm ngược
-        document.getElementById('countdown-timer').style.display = 'block';
-
-        // Thời gian thi từ PHP (đơn vị phút)
-        let durationMinutes = <?= (int) $exam['duration_minutes'] ?>;
-        let remainingTime = durationMinutes * 60; // Đổi ra giây
-
-        const timerDisplay = document.getElementById('timer');
-        const timerInterval = setInterval(() => {
-            const minutes = Math.floor(remainingTime / 60);
-            const seconds = remainingTime % 60;
-            timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-            remainingTime--;
-
-            if (remainingTime < 0) {
-                clearInterval(timerInterval);
-                timerDisplay.textContent = "00:00";
-                alert("⏰ Thời gian của bạn đã hết. Bài thi sẽ được nộp tự động!");
-                document.getElementById('submitForm').submit();
+        // Progress tracking
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'radio') {
+                updateProgress();
             }
-        }, 1000);
-    });
-</script>
+        });
 
+        function updateProgress() {
+            const totalQuestions = document.querySelectorAll('input[type="radio"][name]').length / 4; // 4 options per question
+            const answeredQuestions = new Set();
+            
+            document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
+                answeredQuestions.add(input.name);
+            });
+
+            const progressPercentage = (answeredQuestions.size / totalQuestions) * 100;
+            document.getElementById('progress-fill').style.width = progressPercentage + '%';
+            document.getElementById('progress-text').textContent = Math.round(progressPercentage) + '%';
+        }
+
+        // Smooth scrolling for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Auto-save functionality (optional)
+        let autoSaveInterval;
+        function startAutoSave() {
+            autoSaveInterval = setInterval(() => {
+                const formData = new FormData(document.getElementById('submitForm'));
+                // You can implement auto-save to localStorage or server here
+                console.log('Auto-saving progress...');
+            }, 30000); // Auto-save every 30 seconds
+        }
+
+        // Confirmation before leaving page
+        window.addEventListener('beforeunload', function (e) {
+            const hasStarted = document.getElementById('startExamBtn').classList.contains('d-none');
+            if (hasStarted && !document.getElementById('submitForm').submitted) {
+                e.preventDefault();
+                e.returnValue = 'Bạn có chắc chắn muốn rời khỏi trang? Tiến độ làm bài có thể bị mất.';
+            }
+        });
+
+        // Mark form as submitted when submitting
+        document.getElementById('submitForm').addEventListener('submit', function() {
+            this.submitted = true;
+        });
+
+        // Add hover effects to options
+        document.addEventListener('DOMContentLoaded', function() {
+            const optionLabels = document.querySelectorAll('.option-label');
+            optionLabels.forEach(label => {
+                label.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateX(5px)';
+                });
+                label.addEventListener('mouseleave', function() {
+                    if (!this.previousElementSibling.checked) {
+                        this.style.transform = 'translateX(0)';
+                    }
+                });
+            });
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const submitBtn = document.getElementById('submitExamBtn');
+                if (!submitBtn.classList.contains('d-none')) {
+                    submitBtn.click();
+                }
+            }
+        });
+
+        // Add visual feedback for selected answers
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'radio') {
+                // Remove previous selection styling
+                const questionContainer = e.target.closest('.question-container');
+                questionContainer.querySelectorAll('.option-label').forEach(label => {
+                    label.classList.remove('selected');
+                });
+                
+                // Add styling to selected option
+                e.target.nextElementSibling.classList.add('selected');
+                
+                // Add completion checkmark to question number
+                const questionNumber = questionContainer.querySelector('.question-number');
+                if (!questionNumber.querySelector('.fa-check')) {
+                    questionNumber.innerHTML += ' <i class="fas fa-check" style="font-size: 0.8rem;"></i>';
+                }
+            }
+        });
+
+// Ẩn nút bắt đầu nếu đã có kết quả
+<?php if ($show_results): ?>
+document.addEventListener('DOMContentLoaded', function() {
+    const startBtn = document.getElementById('startExamBtn');
+    const submitBtn = document.getElementById('submitExamBtn');
+    if (startBtn) startBtn.style.display = 'none';
+    if (submitBtn) submitBtn.style.display = 'none';
+    
+    // Scroll to results
+    const resultContainer = document.querySelector('.result-container');
+    if (resultContainer) {
+        setTimeout(() => {
+            resultContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 500);
+    }
+});
+<?php endif; ?>
+
+// Back to Top functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const backToTopBtn = document.getElementById('backToTop');
+    
+    // Show/hide button based on scroll position
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            backToTopBtn.style.display = 'flex';
+            backToTopBtn.style.opacity = '1';
+        } else {
+            backToTopBtn.style.opacity = '0';
+            setTimeout(() => {
+                if (window.pageYOffset <= 300) {
+                    backToTopBtn.style.display = 'none';
+                }
+            }, 300);
+        }
+    });
+    
+    // Smooth scroll to top
+    backToTopBtn.addEventListener('click', function(e) {
+        e.preventDefault();
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+    
+    // Initially hide the button
+    backToTopBtn.style.display = 'none';
+});
+    </script>
+
+    <style>
+        .option-label.selected {
+            background: linear-gradient(135deg, #dbeafe, #bfdbfe) !important;
+            border-color: var(--primary-color) !important;
+            transform: translateX(5px) !important;
+        }
+
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            opacity: 0;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-xl);
+            color: white;
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        }
+
+        .back-to-top:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+        }
+
+        /* Loading animation for audio */
+        .audio-player::-webkit-media-controls-panel {
+            background-color: white;
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--light-bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+        }
+
+        .result-option.correct-not-selected {
+            background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+            border-color: #f59e0b !important;
+            color: #92400e !important;
+        }
+
+        .legend-color.correct-not-selected {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+        }
+    </style>
 </body>
 </html>

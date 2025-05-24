@@ -273,4 +273,21 @@ class ExamModel {
 
         return $data;
     }
+    public function getAllFullExams() {
+        $sql = "SELECT exam_id, title, type, duration_minutes, difficulty_level 
+                FROM exam 
+                WHERE type = 'full'";
+        $result = mysqli_query($this->conn, $sql);
+
+        if (!$result) {
+            die("Lỗi truy vấn: " . mysqli_error($this->conn));
+        }
+
+        $data = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+
+        return $data;
+    }
 }

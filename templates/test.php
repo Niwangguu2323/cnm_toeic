@@ -1,13 +1,18 @@
 <?php
 session_start();
 ?>
+<?php
+require_once __DIR__ . '/../models/ExamModel.php';
 
+$model = new ExamModel();
+$exams = $model->getAllFullExams();
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <title>2N Toeic Lab - Luyện thi</title>
+    <title>2N Toeic Lab - Luyện Thi</title>
     <meta content="width=device-width, initial-scale=1.0" name="viewport">
     <meta content="" name="keywords">
     <meta content="" name="description">
@@ -58,13 +63,13 @@ session_start();
                 <a href="../index.php" class="nav-item nav-link">Trang chủ</a>
                 <a href="about.php" class="nav-item nav-link">Về chúng tôi</a>
                 <div class="nav-item dropdown">
-                    <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Luyện tập</a>
+                    <a href="test.php" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Luyện tập</a>
                     <div class="dropdown-menu fade-down m-0">
-                        <a href="listening.php" class="dropdown-item">Nghe</a>
+                        <a href="listening.php" class="dropdown-item active">Nghe</a>
                         <a href="reading.php" class="dropdown-item">Đọc</a>
                     </div>
                 </div>
-                <a href="test.php" class="nav-item nav-link active">Làm bài thi</a>
+                <a href="test.php" class="nav-item nav-link">Làm bài thi</a>
             </div>
             <?php if (isset($_SESSION["user_email"])): ?>
                 <div class="nav-item dropdown me-4">
@@ -103,15 +108,45 @@ session_start();
     <!-- Header End -->
 
 
-    <!-- Test list Start -->
+    <!-- Listening test list Start -->
     <div class="container-xxl py-5">
         <div class="container">
             <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
-                <h6 class="section-title bg-white text-center text-primary px-3">Các bài thi</h6>
+                <h6 class="section-title bg-white text-center text-primary px-3">Các bài luyện thi</h6>
             </div>
+             <div class="container">
+        <div class="row g-4 justify-content-center">
+            <?php if (!empty($exams)): ?>
+                <?php foreach ($exams as $index => $exam): ?>
+                    <div class="col-lg-4 col-md-6 wow fadeInUp" data-wow-delay="<?= 0.1 * ($index + 1) ?>s">
+                        <div class="course-item bg-light">
+                            <div class="text-center p-4 pb-0">
+                                <h3 class="mb-0"><?= htmlspecialchars($exam['title']) ?></h3>
+                            </div>
+                            <div class="d-flex border-top">
+                                <small class="flex-fill text-center border-end py-2">
+                                    <i class="fa fa-user-tie text-primary me-2"></i>Năm 2025
+                                </small>
+                                <small class="flex-fill text-center border-end py-2">
+                                    <i class="fa fa-clock text-primary me-2"></i><?= $exam['duration_minutes'] ?> phút
+                                </small>
+                            </div>
+                            <div class="text-center p-4 pb-0">
+                                <a class="btn btn-primary mb-3 w-100" href="examdetails.php?id=<?= $exam['exam_id'] ?>">
+                                    Xem chi tiết bài thi
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <p class="text-center">Không có bài thi nghe nào trong hệ thống.</p>
+            <?php endif; ?>
+        </div>
+    </div>
         </div> 
     </div>
-    <!-- Test list end -->
+    <!-- Listening test list end -->
 
 
     <!-- Footer Start -->
@@ -174,7 +209,8 @@ session_start();
     <script src="lib/easing/easing.min.js"></script>
     <script src="lib/waypoints/waypoints.min.js"></script>
     <script src="lib/owlcarousel/owl.carousel.min.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/npm/wowjs@1.1.3/dist/wow.min.js"></script>
+    <script> new WOW().init(); </script>
     <!-- Template Javascript -->
     <script src="js/main.js"></script>
 </body>
