@@ -1,13 +1,3 @@
-<?php
-session_start();
-
-// Nếu chưa đăng nhập hoặc không phải là admin thì chặn truy cập
-if (!isset($_SESSION["user_email"]) || $_SESSION["user_role"] !== 'admin') {
-    header("Location: ../index.php");
-    exit;
-}
-?>
-
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -40,11 +30,26 @@ if (!isset($_SESSION["user_email"]) || $_SESSION["user_role"] !== 'admin') {
     <link href="../public/css/style.css" rel="stylesheet">
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <style>
+        /* Style cho hàng được chọn */
+        .selected-row {
+            background-color: #e0f7fa !important;
+        }
+        
+        /* Cursor pointer cho các hàng */
+        #userTable tbody tr {
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body class="p-4">
     <a href="../index.php" class="btn btn-secondary">Trở lại trang chủ</a> </br></br>
     <a href="#" class="btn btn-danger" id="btnDeleteUser">Xóa người dùng</a> </br></br>
     <h3 class="mb-4">📘 Danh sách người dùng</h3>
+    <div class="alert alert-info">
+        <i class="bi bi-info-circle"></i> Click vào người dùng để chọn và chỉnh sửa thông tin.
+    </div>
     <div class="container-fluid">
         <div class="row">
             <!-- BÊN TRÁI: DANH SÁCH NGƯỜI DÙNG -->
@@ -91,56 +96,148 @@ if (!isset($_SESSION["user_email"]) || $_SESSION["user_role"] !== 'admin') {
         </div>
     </div>
 
+    <!-- Modal Xác nhận xóa -->
+    <div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deleteConfirmModalLabel">Xác nhận xóa người dùng</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn xóa người dùng "<span id="userNameToDelete"></span>" không?</p>
+                    <p class="text-danger">Lưu ý: Hành động này không thể hoàn tác!</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="button" class="btn btn-danger" id="btnConfirmDelete">Xóa</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            fetch('../api/user/get.php')
+            // Biến lưu trữ thông tin người dùng đang được chọn
+            let selectedUserId = null;
+            let selectedUserName = null;
+
+            // Load danh sách người dùng
+            loadUsers();
+
+            // Xử lý sự kiện khi nhấn nút xóa người dùng
+            document.getElementById('btnDeleteUser').addEventListener('click', () => {
+                if (!selectedUserId) {
+                    alert('Vui lòng chọn một người dùng để xóa!');
+                    return;
+                }
+
+                // Hiển thị tên người dùng trong modal xác nhận
+                document.getElementById('userNameToDelete').textContent = selectedUserName;
+                
+                // Hiển thị modal xác nhận
+                const deleteConfirmModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+                deleteConfirmModal.show();
+            });
+
+            // Xử lý sự kiện khi xác nhận xóa
+            document.getElementById('btnConfirmDelete').addEventListener('click', () => {
+                if (!selectedUserId) return;
+
+                // Gửi yêu cầu xóa
+                fetch(`../api/user/delete.php?id=${selectedUserId}`, {
+                    method: 'DELETE'
+                })
                 .then(response => response.json())
                 .then(data => {
-                    console.log("Dữ liệu nhận được:", data); // Debug log
-                    
-                    if (!Array.isArray(data)) {
-                        console.error("Dữ liệu trả về không phải mảng:", data);
-                        return;
-                    }
-
-                    let rows = '';
-                    data.forEach(user => {
-                        rows += `
-                            <tr data-id="${user.user_id}">
-                                <td>${user.user_id}</td>
-                                <td>${user.user_name}</td>
-                                <td>${user.email}</td>
-                                <td>${user.password}</td>
-                                <td>${user.full_name}</td>
-                                <td>${user.phone}</td>
-                                <td>${user.role}</td>
-                            </tr>`;
-                    });
-
-                    const tbody = document.querySelector('#userTable tbody');
-                    if (tbody) {
-                        tbody.innerHTML = rows;
-
-                        // GẮN SỰ KIỆN CLICK CHỌN DÒNG
-                        tbody.querySelectorAll('tr').forEach(row => {
-                            row.addEventListener('click', () => {
-                                const cells = row.children;
-                                document.getElementById('user_id').value = cells[0].textContent;
-                                document.getElementById('user_name').value = cells[1].textContent;
-                                document.getElementById('email').value = cells[2].textContent;
-                                document.getElementById('password').value = cells[3].textContent;
-                                document.getElementById('full_name').value = cells[4].textContent;
-                                document.getElementById('phone').value = cells[5].textContent;
-                                document.getElementById('role').value = cells[6].textContent;
-                            });
-                        });
+                    if (data.success) {
+                        alert(data.message);
+                        // Đóng modal
+                        const deleteConfirmModal = bootstrap.Modal.getInstance(document.getElementById('deleteConfirmModal'));
+                        deleteConfirmModal.hide();
+                        // Làm mới danh sách
+                        loadUsers();
+                        // Reset form và biến lưu trữ
+                        document.getElementById('updateForm').reset();
+                        selectedUserId = null;
+                        selectedUserName = null;
                     } else {
-                        console.error("Không tìm thấy <tbody>!");
+                        alert('Lỗi: ' + data.message);
                     }
                 })
                 .catch(error => {
-                    console.error("Lỗi khi gọi API:", error);
+                    console.error('Lỗi khi xóa người dùng:', error);
+                    alert('Không thể xóa người dùng. Vui lòng thử lại sau.');
                 });
+            });
+
+            // Hàm load danh sách người dùng
+            function loadUsers() {
+                fetch('../api/user/get.php')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log("Dữ liệu nhận được:", data); // Debug log
+                        
+                        if (!Array.isArray(data)) {
+                            console.error("Dữ liệu trả về không phải mảng:", data);
+                            return;
+                        }
+
+                        let rows = '';
+                        data.forEach(user => {
+                            rows += `
+                                <tr data-id="${user.user_id}" data-name="${user.user_name}">
+                                    <td>${user.user_id}</td>
+                                    <td>${user.user_name}</td>
+                                    <td>${user.email}</td>
+                                    <td>${user.password}</td>
+                                    <td>${user.full_name}</td>
+                                    <td>${user.phone}</td>
+                                    <td>${user.role}</td>
+                                </tr>`;
+                        });
+
+                        const tbody = document.querySelector('#userTable tbody');
+                        if (tbody) {
+                            tbody.innerHTML = rows;
+
+                            // GẮN SỰ KIỆN CLICK CHỌN DÒNG
+                            tbody.querySelectorAll('tr').forEach(row => {
+                                row.addEventListener('click', () => {
+                                    // Bỏ chọn tất cả các hàng khác
+                                    tbody.querySelectorAll('tr').forEach(r => {
+                                        r.classList.remove('selected-row');
+                                    });
+                                    
+                                    // Chọn hàng hiện tại
+                                    row.classList.add('selected-row');
+                                    
+                                    // Lưu thông tin người dùng đang chọn
+                                    selectedUserId = row.getAttribute('data-id');
+                                    selectedUserName = row.getAttribute('data-name');
+
+                                    // Điền thông tin vào form
+                                    const cells = row.children;
+                                    document.getElementById('user_id').value = cells[0].textContent;
+                                    document.getElementById('user_name').value = cells[1].textContent;
+                                    document.getElementById('email').value = cells[2].textContent;
+                                    document.getElementById('password').value = cells[3].textContent;
+                                    document.getElementById('full_name').value = cells[4].textContent;
+                                    document.getElementById('phone').value = cells[5].textContent;
+                                    document.getElementById('role').value = cells[6].textContent;
+                                });
+                            });
+                        } else {
+                            console.error("Không tìm thấy <tbody>!");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Lỗi khi gọi API:", error);
+                    });
+            }
 
             // Sự kiện cập nhật
             document.getElementById('updateForm').addEventListener('submit', (e) => {
@@ -166,7 +263,7 @@ if (!isset($_SESSION["user_email"]) || $_SESSION["user_role"] !== 'admin') {
                         const json = JSON.parse(text);
                         if (res.ok) {
                             alert(json.message || 'Cập nhật thành công!');
-                            location.reload();
+                            loadUsers(); // Reload danh sách thay vì reload trang
                         } else {
                             alert(json.message || 'Lỗi server: ' + res.status);
                             console.error(json);
