@@ -20,7 +20,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         // Lưu vào session
         $_SESSION["user_email"] = $user["email"];
         $_SESSION["user_role"] = $user["role"]; // 🌟 THÊM DÒNG NÀY
-
+        $_SESSION['user_id'] = $user['user_id'];
         header("Location: ../index.php");
         exit;
     } else {

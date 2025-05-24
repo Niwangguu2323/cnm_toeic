@@ -15,27 +15,107 @@ if (!$exam) {
     echo "<p>Không tìm thấy đề thi.</p>";
     exit;
 }
+
+
+
+// HÀM QUY ĐỔI ĐIỂM THEO BẢNG TOEIC
+function quyDoiDiemReading($soCauDung) {
+    $bangDiem = [
+        // Dựa vào bảng bạn cung cấp
+        0 => 5, 1 => 5, 2 => 5, 3 => 10, 4 => 15, 5 => 20,
+        6 => 25, 7 => 30, 8 => 35, 9 => 40, 10 => 45, 11 => 50, 12 => 55,
+        13 => 60, 14 => 65, 15 => 70, 16 => 75, 17 => 80, 18 => 85, 19 => 90,
+        20 => 95, 21 => 100, 22 => 105, 23 => 110, 24 => 115, 25 => 120,
+        26 => 125, 27 => 130, 28 => 135, 29 => 140, 30 => 145, 31 => 150,
+        32 => 155, 33 => 160, 34 => 165, 35 => 170, 36 => 175, 37 => 180,
+        38 => 185, 39 => 190, 40 => 195, 41 => 200, 42 => 205, 43 => 210,
+        44 => 215, 45 => 220, 46 => 225, 47 => 230, 48 => 235, 49 => 240,
+        50 => 245, 51 => 250, 52 => 255, 53 => 260, 54 => 265, 55 => 270,
+        56 => 275, 57 => 280, 58 => 285, 59 => 290, 60 => 295, 61 => 300,
+        62 => 305, 63 => 310, 64 => 315, 65 => 320, 66 => 325, 67 => 330,
+        68 => 335, 69 => 340, 70 => 345, 71 => 350, 72 => 355, 73 => 360,
+        74 => 365, 75 => 370, 76 => 375, 77 => 380, 78 => 385, 79 => 390,
+        80 => 395, 81 => 400, 82 => 405, 83 => 410, 84 => 415, 85 => 420,
+        86 => 425, 87 => 430, 88 => 435, 89 => 440, 90 => 445, 91 => 450,
+        92 => 455, 93 => 460, 94 => 465, 95 => 470, 96 => 475, 97 => 480,
+        98 => 485, 99 => 490, 100 => 495
+    ];
+    return $bangDiem[min(100, max(0, $soCauDung))];
+}
+
+function quyDoiDiemListening($soCauDung) {
+    $bangDiem = [
+        // Dựa vào bảng bạn cung cấp
+        0 => 5, 1 => 15, 2 => 20, 3 => 25, 4 => 30, 5 => 35, 6 => 40,
+        7 => 45, 8 => 50, 9 => 55, 10 => 60, 11 => 70, 12 => 75, 13 => 80,
+        14 => 85, 15 => 90, 16 => 95, 17 => 100, 18 => 105, 19 => 110,
+        20 => 115, 21 => 120, 22 => 125, 23 => 130, 24 => 135, 25 => 140,
+        26 => 145, 27 => 150, 28 => 155, 29 => 160, 30 => 165, 31 => 170,
+        32 => 175, 33 => 180, 34 => 185, 35 => 190, 36 => 195, 37 => 200,
+        38 => 205, 39 => 210, 40 => 215, 41 => 220, 42 => 225, 43 => 230,
+        44 => 235, 45 => 240, 46 => 245, 47 => 250, 48 => 255, 49 => 260,
+        50 => 265, 51 => 270, 52 => 275, 53 => 280, 54 => 285, 55 => 290,
+        56 => 295, 57 => 300, 58 => 305, 59 => 310, 60 => 315, 61 => 320,
+        62 => 325, 63 => 330, 64 => 335, 65 => 340, 66 => 345, 67 => 350,
+        68 => 355, 69 => 360, 70 => 365, 71 => 370, 72 => 375, 73 => 380,
+        74 => 385, 75 => 390, 76 => 395, 77 => 400, 78 => 405, 79 => 410,
+        80 => 415, 81 => 420, 82 => 425, 83 => 430, 84 => 435, 85 => 440,
+        86 => 445, 87 => 450, 88 => 455, 89 => 460, 90 => 465, 91 => 470,
+        92 => 475, 93 => 480, 94 => 485, 95 => 490, 96 => 495, 97 => 495,
+        98 => 495, 99 => 495, 100 => 495
+    ];
+    return $bangDiem[min(100, max(0, $soCauDung))];
+}
 // CHẤM ĐIỂM
 $ketQua = "";
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $tongCau = 0;
     $soCauDung = 0;
 
-    foreach ($_POST as $qid => $traloi) {
-        if (!is_numeric($qid)) continue;
-        $qid = (int)$qid;
-        $traloi = mysqli_real_escape_string($conn, $traloi);
-        $tongCau++;
+    // Lấy tổng số câu trong đề thi
+    $tong_sql = "SELECT COUNT(*) AS total FROM exam_question WHERE exam_id = $exam_id";
+    $tong_result = mysqli_query($conn, $tong_sql);
+    $tong_row = mysqli_fetch_assoc($tong_result);
+    $tongCau = (int)($tong_row['total'] ?? 0);
 
-        $sql = "SELECT correct_answer FROM exam_question WHERE question_id = $qid";
-        $res = mysqli_query($conn, $sql);
-        $row = mysqli_fetch_assoc($res);
-        if ($row && strtoupper($row['correct_answer']) === strtoupper($traloi)) {
-            $soCauDung++;
-        }
+    foreach ($_POST as $qid => $traloi) {
+    if (!is_numeric($qid)) continue;
+    $qid = (int)$qid;
+    $traloi = mysqli_real_escape_string($conn, $traloi);
+
+    $sql = "SELECT correct_answer FROM exam_question WHERE question_id = $qid";
+    $res = mysqli_query($conn, $sql);
+    $row = mysqli_fetch_assoc($res);
+    if ($row && strtoupper($row['correct_answer']) === strtoupper($traloi)) {
+        $soCauDung++;
+    }
+}
+     $reading_score = null;
+    $listening_score = null;
+
+    if ($exam['type'] === 'Reading') {
+        $reading_score = quyDoiDiemReading($soCauDung);
+        $total_score = $reading_score;
+    } else {
+        $listening_score = quyDoiDiemListening($soCauDung);
+        $total_score = $listening_score;
     }
 
-    $ketQua = "🎯 Bạn đã làm đúng <strong>$soCauDung / $tongCau</strong> câu hỏi!";
+    $ketQua = "🎯 Bạn đã làm đúng <strong>$soCauDung / $tongCau</strong> câu hỏi!<br>";
+    if ($reading_score !== null) {
+        $ketQua .= "📘 Điểm Reading (quy đổi): <strong>$reading_score</strong>";
+    } else {
+        $ketQua .= "🎧 Điểm Listening (quy đổi): <strong>$listening_score</strong>";
+    }
+
+    if (isset($_SESSION['user_id'])) {
+        $user_id = $_SESSION['user_id'];
+        $date = date('Y-m-d');
+
+        $insert_sql = "INSERT INTO exam_result (user_id, exam_id, listening_score, reading_score, total_score, time)
+                       VALUES ($user_id, $exam_id, ". ($listening_score ?? 'NULL') . ", ". ($reading_score ?? 'NULL') . ", $total_score, '$date')";
+
+        mysqli_query($conn, $insert_sql);
+    }
 }
 
 // Lấy passage nếu là Reading
@@ -184,7 +264,11 @@ if ($exam['type'] === 'Listening') {
         <div class="alert alert-success text-center"><?= $ketQua ?></div>
     <?php endif; ?>
 
+    <?php if (!isset($_SESSION['user_id'])): ?>
+    <div class="alert alert-warning">⚠️ Vui lòng <a href="login.php">đăng nhập</a> để làm bài thi.</div>
+<?php else: ?>
     <button id="startExamBtn" class="btn btn-success mb-4">🎯 Làm bài thi</button>
+<?php endif; ?>
    <!-- Thời gian làm bài -->
 <div id="countdown-timer" class="mb-4 fs-5 fw-bold text-danger" style="display: none;">
     ⏳ Thời gian còn lại: <span id="timer">--:--</span>
@@ -259,6 +343,7 @@ if ($exam['type'] === 'Listening') {
         <button type="submit" class="btn btn-primary mt-4">📝 Nộp bài</button>
     </form>
 </div>
+
         <!-- Footer Start -->
     <div class="container-fluid bg-dark text-light footer pt-5 mt-5 wow fadeIn" data-wow-delay="0.1s">
         <div class="container py-5">
@@ -371,5 +456,6 @@ if ($exam['type'] === 'Listening') {
         }, 1000);
     });
 </script>
+
 </body>
 </html>
