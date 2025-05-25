@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once __DIR__ . '/../models/ExamModel.php';
+require_once __DIR__ . '/../services/nlp_helper.php';
 
 $model = new ExamModel();
 $exam_id = $_GET['id'] ?? 0;
@@ -15,6 +16,10 @@ if (!$exam) {
     echo "<p>Không tìm thấy đề thi.</p>";
     exit;
 }
+
+// Xác định chế độ thi (practice hoặc exam)
+$exam_mode = NLPHelper::determineExamMode($exam);
+$is_practice_mode = ($exam_mode === 'practice');
 
 // HÀM QUY ĐỔI ĐIỂM THEO BẢNG TOEIC
 function quyDoiDiemReading($soCauDung) {
@@ -63,12 +68,20 @@ function quyDoiDiemListening($soCauDung) {
     return $bangDiem[min(100, max(0, $soCauDung))];
 }
 
-// Hàm render câu hỏi với kết quả
-function renderQuestionWithResults($q, $cauSo, $detailed_results, $show_results) {
+// Hàm render câu hỏi với kết quả và NLP highlighting
+function renderQuestionWithResults($q, $cauSo, $detailed_results, $show_results, $is_practice_mode) {
     $qid = $q['question_id'];
     $user_answer = $detailed_results[$qid]['user_answer'] ?? null;
     $correct_answer = $detailed_results[$qid]['correct_answer'] ?? $q['correct_answer'];
     $is_correct = $detailed_results[$qid]['is_correct'] ?? null;
+    
+    // Xử lý NLP cho nội dung câu hỏi
+    $question_content = $q['content'];
+    if ($is_practice_mode && !$show_results) {
+        $question_content = NLPHelper::processText($question_content, 'practice');
+    } else {
+        $question_content = htmlspecialchars($q['content']);
+    }
     
     ob_start(); // Bắt đầu output buffering
     ?>
@@ -338,7 +351,8 @@ foreach ($questions as $q) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
     <!-- Thêm vào phần head -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
-     <!-- Template Stylesheet -->
+    
+  <!-- Template Stylesheet -->
     <link href="../public/css/examdetails_style.css" rel="stylesheet">
 </head>
 <body>
@@ -361,7 +375,7 @@ foreach ($questions as $q) {
                         <a href="./reading.php" class="dropdown-item">Đọc</a>
                     </div>
                 </div>
-                <a href="templates/test.php" class="nav-item nav-link">Làm bài thi</a>
+                <a href="test.php" class="nav-item nav-link">Làm bài thi</a>
             </div>
             <?php if (isset($_SESSION["user_email"])): ?>
                 <div class="nav-item dropdown me-4">
@@ -424,7 +438,17 @@ foreach ($questions as $q) {
     <div class="main-content">
         <div class="container">
             <div class="content-wrapper">
-                
+                <!-- Practice Mode Indicator -->
+                <?php if ($is_practice_mode && !$show_results): ?>
+                    <div class="practice-mode-indicator animate__animated animate__bounceIn">
+                        <h5><i class="fas fa-lightbulb me-2"></i>Chế độ luyện thi - Từ khóa quan trọng đã được highlight</h5>
+                        <p class="mb-0">Các từ khóa TOEIC, từ nối và từ chỉ thị quan trọng sẽ được đánh dấu màu để giúp bạn học tập hiệu quả hơn.</p>
+                    </div> </br></br>
+                    
+                    <!-- Keyword Legend -->
+                    <?= NLPHelper::getStyles() ?>
+                <?php endif; ?>
+
                 <!-- Result Display -->
                 <?php if ($ketQua): ?>
                     <div class="result-container animate__animated animate__bounceIn">
@@ -442,6 +466,18 @@ foreach ($questions as $q) {
                         Vui lòng <a href="login.php" class="fw-bold">đăng nhập</a> để làm bài thi và lưu kết quả.
                     </div>
                 <?php endif; ?>
+
+                <!-- Mode Toggle Buttons -->
+                <div class="action-buttons">
+                    <?php if (!$show_results): ?>
+                        <a href="?id=<?= $exam_id ?>&mode=practice" class="btn btn-modern <?= $is_practice_mode ? 'btn-success' : 'btn-outline-success' ?>">
+                            <i class="fas fa-graduation-cap me-2"></i>Chế độ luyện thi
+                        </a>
+                        <a href="?id=<?= $exam_id ?>&mode=exam" class="btn btn-modern <?= !$is_practice_mode ? 'btn-danger' : 'btn-outline-danger' ?>">
+                            <i class="fas fa-clock me-2"></i>Chế độ thi thật
+                        </a>
+                    <?php endif; ?>
+                </div>
 
                 <!-- Timer -->
                 <div id="countdown-timer" class="timer-container" style="display: none;">
@@ -509,6 +545,14 @@ foreach ($questions as $q) {
                                         <small class="text-muted">Nghe và trả lời các câu hỏi</small>
                                     </div>
                                 </div>
+                                <?php 
+                                // Xử lý NLP cho nội dung listening
+                                if ($is_practice_mode && !$show_results) {
+                                    echo NLPHelper::processText($info['content'], 'practice');
+                                } else {
+                                    echo nl2br(htmlspecialchars($info['content']));
+                                }
+                                ?>
                                 <p class="mb-3"><?= nl2br(htmlspecialchars($info['content'])) ?></p>
                                 <audio controls class="audio-player">
                                     <source src="../public/<?= htmlspecialchars($info['audio_url']) ?>" type="audio/mpeg">
@@ -562,6 +606,16 @@ foreach ($questions as $q) {
                                         <small class="text-muted">Đọc đoạn văn và trả lời câu hỏi</small>
                                     </div>
                                 </div>
+                                <div>
+                                    <?php 
+                                    // Xử lý NLP cho passage content
+                                    if ($is_practice_mode && !$show_results) {
+                                        echo NLPHelper::processText($content, 'practice');
+                                    } else {
+                                        echo nl2br(htmlspecialchars($content));
+                                    }
+                                    ?>
+                                </div>
                                 <div class="passage-content">
                                     <?= nl2br(htmlspecialchars($content)) ?>
                                 </div>
@@ -596,7 +650,7 @@ foreach ($questions as $q) {
                                     </div>
                                 </div>
                                 <?php foreach ($no_passage_questions as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
@@ -612,11 +666,21 @@ foreach ($questions as $q) {
                                         <small class="text-muted">Đọc đoạn văn và trả lời câu hỏi</small>
                                     </div>
                                 </div>
+                                <div>
+                                    <?php 
+                                    // Xử lý NLP cho passage content
+                                    if ($is_practice_mode && !$show_results) {
+                                        echo NLPHelper::processText($content, 'practice');
+                                    } else {
+                                        echo nl2br(htmlspecialchars($content));
+                                    }
+                                    ?>
+                                </div>
                                 <div class="passage-content">
                                     <?= nl2br(htmlspecialchars($content)) ?>
                                 </div>
                                 <?php foreach ($grouped_questions[$pid] ?? [] as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endforeach; ?>
@@ -645,6 +709,14 @@ foreach ($questions as $q) {
                                         <small class="text-muted">Nghe và trả lời các câu hỏi</small>
                                     </div>
                                 </div>
+                                    <?php 
+                                    // Xử lý NLP cho nội dung listening
+                                    if ($is_practice_mode && !$show_results) {
+                                        echo NLPHelper::processText($info['content'], 'practice');
+                                    } else {
+                                        echo nl2br(htmlspecialchars($info['content']));
+                                    }
+                                    ?>
                                 <p class="mb-3"><?= nl2br(htmlspecialchars($info['content'])) ?></p>
                                 <audio controls class="audio-player">
                                     <source src="../public/<?= htmlspecialchars($info['audio_url']) ?>" type="audio/mpeg">
@@ -652,7 +724,7 @@ foreach ($questions as $q) {
                                 </audio>
                                 
                                 <?php foreach ($grouped_listening_questions[$lid] ?? [] as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endforeach; ?>

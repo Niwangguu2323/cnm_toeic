@@ -1,5 +1,4 @@
 <?php
-    // Sử dụng đường dẫn tuyệt đối thay vì tương đối
     require_once __DIR__ . '/../controllers/UserController.php';
     
     class UserModel{
@@ -100,5 +99,49 @@
             }
         }
         
+        // Hàm xóa người dùng
+        public function deleteUser($user_id) {
+            try {
+                $p = new UserController();
+                
+                // Kiểm tra xem người dùng có tồn tại không
+                $checkSql = "SELECT user_id, user_name FROM user WHERE user_id = " . intval($user_id);
+                $checkResult = $p->runQuery($checkSql);
+                
+                if (!$checkResult || mysqli_num_rows($checkResult) == 0) {
+                    return [
+                        "success" => false,
+                        "message" => "Không tìm thấy người dùng với ID: " . $user_id
+                    ];
+                }
+                
+                // Lấy thông tin người dùng trước khi xóa
+                $userInfo = mysqli_fetch_assoc($checkResult);
+                
+                // Chuẩn bị câu SQL delete
+                $sql = "DELETE FROM user WHERE user_id = " . intval($user_id);
+                
+                // Thực thi câu lệnh delete
+                $result = $p->deleteUser($sql);
+                
+                if ($result) {
+                    return [
+                        "success" => true,
+                        "message" => "Xóa người dùng '" . $userInfo['user_name'] . "' thành công"
+                    ];
+                } else {
+                    return [
+                        "success" => false,
+                        "message" => "Không thể xóa người dùng"
+                    ];
+                }
+                
+            } catch (Exception $e) {
+                return [
+                    "success" => false,
+                    "message" => "Lỗi: " . $e->getMessage()
+                ];
+            }
+        }
     }
 ?>

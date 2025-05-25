@@ -63,13 +63,13 @@ $exams = $model->getAllFullExams();
                 <a href="../index.php" class="nav-item nav-link">Trang chủ</a>
                 <a href="about.php" class="nav-item nav-link">Về chúng tôi</a>
                 <div class="nav-item dropdown">
-                    <a href="test.php" class="nav-link dropdown-toggle active" data-bs-toggle="dropdown">Luyện tập</a>
+                    <a href="test.php" class="nav-link dropdown-toggle" data-bs-toggle="dropdown">Luyện tập</a>
                     <div class="dropdown-menu fade-down m-0">
-                        <a href="listening.php" class="dropdown-item active">Nghe</a>
+                        <a href="listening.php" class="dropdown-item">Nghe</a>
                         <a href="reading.php" class="dropdown-item">Đọc</a>
                     </div>
                 </div>
-                <a href="test.php" class="nav-item nav-link">Làm bài thi</a>
+                <a href="test.php" class="nav-item nav-link active">Làm bài thi</a>
             </div>
             <?php if (isset($_SESSION["user_email"])): ?>
                 <div class="nav-item dropdown me-4">

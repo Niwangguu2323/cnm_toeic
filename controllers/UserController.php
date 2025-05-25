@@ -86,14 +86,14 @@ class UserController {
 
         // Phương thức runQuery để thực thi câu lệnh SELECT
         public function runQuery($sql) {
-            $p = new ketnoi(); // Sử dụng ketnoi thay vì clsKetNoi
+            $p = new ketnoi(); 
             $con = $p->moketnoi();
             if($con) {
                 $result = $con->query($sql);
                 $p->dongketnoi($con);
                 return $result;
             } else {
-                return false; // không thể kết nối với CSDL
+                return false; 
             }
         }
 
@@ -105,13 +105,31 @@ class UserController {
             if($con) {
                 if($con->query($sql) === TRUE) {
                     $p->dongketnoi($con);
-                    return true; // Trả về true nếu cập nhật thành công
+                    return true; 
                 } else {
                     $p->dongketnoi($con);
-                    return false; // Trả về false nếu có lỗi khi cập nhật
+                    return false; 
                 }
             } else {
-                return false; // Trả về false nếu không thể kết nối đến cơ sở dữ liệu
+                return false; 
+            }
+        }
+
+        // Phương thức deleteUser để thực thi câu lệnh DELETE
+        public function deleteUser($sql) {
+            $p = new ketnoi();
+            $con = $p->moketnoi();
+            
+            if($con) {
+                if($con->query($sql) === TRUE) {
+                    $p->dongketnoi($con);
+                    return true; 
+                } else {
+                    $p->dongketnoi($con);
+                    return false; 
+                }
+            } else {
+                return false; 
             }
         }
 

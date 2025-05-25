@@ -1,0 +1,157 @@
+/* NLP Keyword Highlighting Styles */
+.highlight-toeic {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #92400e;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  border-bottom: 2px solid #f59e0b;
+  cursor: help;
+  transition: all 0.3s ease;
+}
+
+.highlight-signal {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  color: #1e40af;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  border-bottom: 2px solid #3b82f6;
+  cursor: help;
+  transition: all 0.3s ease;
+}
+
+.highlight-question {
+  background: linear-gradient(135deg, #fecaca, #fca5a5);
+  color: #dc2626;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 600;
+  border-bottom: 2px solid #ef4444;
+  cursor: help;
+  transition: all 0.3s ease;
+}
+
+.highlight-default {
+  background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+  color: #374151;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-weight: 500;
+  cursor: help;
+  transition: all 0.3s ease;
+}
+
+.importance-high {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transform: scale(1.02);
+}
+
+.importance-medium {
+  opacity: 0.9;
+}
+
+.importance-low {
+  opacity: 0.7;
+}
+
+/* Hover effects */
+[class*="highlight-"]:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  position: relative;
+}
+
+/* Tooltip for keywords */
+[data-keyword]:hover::after {
+  content: attr(data-type);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1f2937;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 1000;
+  margin-bottom: 5px;
+}
+
+/* Study tips panel */
+.study-tips-panel {
+  background: linear-gradient(135deg, #f0fdf4, #dcfce7);
+  border: 1px solid #16a34a;
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.study-tips-panel h5 {
+  color: #15803d;
+  margin-bottom: 0.5rem;
+}
+
+.study-tips-panel ul {
+  margin: 0;
+  padding-left: 1.2rem;
+}
+
+.study-tips-panel li {
+  margin-bottom: 0.3rem;
+  color: #166534;
+}
+
+/* Keyword legend */
+.keyword-legend {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  margin: 1rem 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.legend-color {
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  margin-right: 0.5rem;
+}
+
+.legend-toeic {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+}
+.legend-signal {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+}
+.legend-question {
+  background: linear-gradient(135deg, #fecaca, #fca5a5);
+}
+
+/* Practice mode indicator */
+.practice-mode-indicator {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 15px;
+  margin-bottom: 2rem;
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  animation: pulse 2s infinite;
+}
+
+.practice-mode-indicator h5 {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
