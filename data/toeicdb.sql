@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1:3306
--- Thời gian đã tạo: Th5 23, 2025 lúc 09:42 AM
+-- Thời gian đã tạo: Th5 25, 2025 lúc 09:22 AM
 -- Phiên bản máy phục vụ: 5.7.31
 -- Phiên bản PHP: 7.3.21
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `exam` (
   `duration_minutes` int(11) NOT NULL,
   `difficulty_level` int(11) NOT NULL,
   PRIMARY KEY (`exam_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `exam`
@@ -45,7 +45,8 @@ INSERT INTO `exam` (`exam_id`, `title`, `type`, `duration_minutes`, `difficulty_
 (1, 'New Economy TOEIC Test 1', 'Reading', 3, 1),
 (2, 'New Economy TOEIC Test 2', 'Reading', 100, 1),
 (3, 'New Economy TOEIC Test 3', 'Reading', 80, 2),
-(4, '	\r\nNew Economy TOEIC Test Listening 1', 'Listening', 100, 1);
+(4, '	\r\nNew Economy TOEIC Test Listening 1', 'Listening', 100, 1),
+(5, 'Test Economy TOEIC Test 3 Full 2025', 'Full', 100, 1);
 
 -- --------------------------------------------------------
 
@@ -69,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `exam_question` (
   KEY `exam_id` (`exam_id`) USING BTREE,
   KEY `Pass` (`passage_id`),
   KEY `FK_lis` (`listening_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=563 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=664 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `exam_question`
@@ -376,7 +377,108 @@ INSERT INTO `exam_question` (`question_id`, `exam_id`, `content`, `correct_answe
 (559, 4, 'What type of business does the woman work for?', 'B', 'A moving company', 'A real estate agency', 'An insurance firm', 'An equipment rental service', NULL, 3),
 (560, 4, 'What is the woman concerned about?', 'B', 'Shipping delays', 'New regulations', 'An increase in competition', 'A shortage of staff', NULL, 3),
 (561, 4, 'What does the woman emphasize about her company?', 'D', 'The affordable prices', 'The number of branch offices', 'The user-friendly Web site', 'The customer service', NULL, 3),
-(562, 4, 'What type of event are the speakers discussing?', 'C', 'A shareholders\' meeting', 'A press conference', 'A job fair', 'A product demonstration', NULL, 3);
+(562, 4, 'What type of event are the speakers discussing?', 'C', 'A shareholders\' meeting', 'A press conference', 'A job fair', 'A product demonstration', NULL, 3),
+(563, 5, 'Ms. Durkin asked for volunteers to help --------------- with the employee fitness program.', 'B', 'she', 'her', 'hers', 'herself', 12, NULL),
+(564, 5, 'Lasner Electronics\' staff have extensive -----------of current hardware systems.', 'C', 'know', 'known', 'knowledge', 'knowledgeable', 12, NULL),
+(565, 5, '----a year, Tarrin Industrial Supply audits the accounts of all of its factories.', 'A', 'Once', 'Immediately', 'Directly', 'Yet', 12, NULL),
+(566, 5, 'Ms. Pham requested a refund------------the coffeemaker she received was damaged.', 'D', 'despite', 'why', 'concerning', 'because', 12, NULL),
+(567, 5, 'Information------------the artwork in the lobby is available at the reception desk.', 'B', 'across', 'about', 'upon', 'except', 12, NULL),
+(568, 5, 'With the Gema XTI binoculars, users can ------------ see objects that are more than 100 meters away.', 'C', 'ease', 'easy', 'easily', 'easier', 12, NULL),
+(569, 5, 'The Physical Therapy Association is committed to keeping costs-------------for its certification programs.', 'A', 'affordable', 'permitted', 'cutting', 'necessary', 12, NULL),
+(570, 5, 'Mr. Brennel----------positions in various areas of the company before he became president.', 'D', 'occupation', 'occupational', 'occupying', 'occupied', 12, NULL),
+(571, 5, 'To remain on schedule, editors must submit all------------to the book to the authors by Friday.', 'C', 'ideas', 'essays', 'revisions', 'suggestions', 12, NULL),
+(572, 5, '----------------------industry professionals are allowed to purchase tickets to the Kuo Photography Fair.', 'A', 'Only', 'Until', 'Unless', 'Quite', 12, NULL),
+(573, 5, 'At Pharmbeck’s banquet, Mr. Jones-------------a trophy for his performance in this year’s quality-improvement initiative.', 'A', 'accepted', 'congratulated', 'nominated', 'hoped', 12, NULL),
+(574, 5, 'Ms. Suto claims that important market trends become--------------with the use of data analysis.', 'C', 'predict', 'prediction', 'predictable', 'predictably', 12, NULL),
+(575, 5, 'One of Grommer Consulting’s goals is to enhance the relationship------------salespeople and their customers.', 'D', 'inside', 'within', 'around', 'between', 12, NULL),
+(576, 5, 'Depending on your answers to the survey, we ------------- you to collect additional information.', 'A', 'may call', 'are calling', 'have been called', 'must be calling', 12, NULL),
+(577, 5, '--------------- Jemburger opened its newest franchise, the first 100 customers were given free hamburgers.', 'B', 'Now', 'When', 'As if', 'After all', 12, NULL),
+(578, 5, 'Please include the serial number of your product in any ------------ with the customer service department.', 'B', 'corresponds', 'correspondence', 'correspondingly', 'correspondent', 12, NULL),
+(579, 5, 'The award-winning film Underwater Secrets promotes awareness ------------- ocean pollution and its effects on our planet.', 'A', 'of', 'to', 'from', 'with', 12, NULL),
+(580, 5, 'BYF Company specializes in ------------ promotional items to help companies advertise their brand.', 'B', 'personally', 'personalized', 'personality', 'personalizes', 12, NULL),
+(581, 5, '-------------- the rent increase is less than 2 percent, Selwin Electrical Supply will continue to lease the space.', 'A', 'As long as', 'Along with', 'Not only', 'Otherwise', 12, NULL),
+(582, 5, 'Belden Hospital’s chief of staff meets regularly with the staff to ensure that procedures ------------ correctly.', 'D', 'to be performed', 'would have performed', 'had been performed', 'are being performed', 12, NULL),
+(583, 5, 'Any requests for time off should be addressed to the ------------ department supervisor.', 'B', 'urgent', 'appropriate', 'subsequent', 'deliverable', 12, NULL),
+(584, 5, 'World Fish Supply delivers the freshest fish possible thanks to innovative ----------------- and shipping methods.', 'D', 'preserves', 'preserved', 'preserve', 'preservation', 12, NULL),
+(585, 5, 'Company executives are currently reviewing the annual budget ------------- submitted to them by the Financial Planning department.', 'A', 'requirements', 'deliveries', 'developers', 'qualities', 12, NULL),
+(586, 5, 'Even the CEO had to admit that Prasma Designs’ win was ------------ the result of fortunate timing.', 'C', 'parts', 'parted', 'partly', 'parting', 12, NULL),
+(587, 5, 'Mr. Singh took notes on ------------- the focus group discussed during the morning session.', 'D', 'each', 'several', 'another', 'everything', 12, NULL),
+(588, 5, 'Last year, Tadaka Computer Solutions ranked third --------------- in regional earnings.', 'B', 'together', 'overall', 'consecutively', 'generally', 12, NULL),
+(589, 5, '--------------- the popularity of the BPT39 wireless speaker, production will be increased fivefold starting next month.', 'D', 'On behalf of', 'Whether', 'Moreover', 'As a result of', 12, NULL),
+(590, 5, 'Zypo Properties has just signed a lease agreement with the law firm ------------ offices are on the third floor.', 'C', 'how', 'what', 'whose', 'wherever', 12, NULL),
+(591, 5, '------------- events this year caused profits in the second and third quarters to differ significantly from original projections.', 'D', 'Total', 'Marginal', 'Representative', 'Unforeseen', 12, NULL),
+(592, 5, 'The timeline for the pathway lighting project was extended to ------------- input from the environmental commission.', 'D', 'use up', 'believe in', 'make into', 'allow for', 12, NULL),
+(593, 5, '', 'A', 'Throughout the trial, you pay nothing and sign no contract.', 'Weight-lifting classes are not currently available.', 'A cash deposit is required when you sign up for membership.', 'All questions should be e-mailed to customerservice@gsgym.com.', 13, NULL),
+(594, 5, '', 'D', 'not even', 'almost', 'over', 'less than', 13, NULL),
+(595, 5, '', 'B', 'justly', 'regularly', 'evenly', 'simply', 13, NULL),
+(596, 5, '', 'C', 'extend', 'renew', 'cancel', 'initiate', 13, NULL),
+(597, 5, '', 'A', 'reasons', 'origins', 'senses', 'contributions', 14, NULL),
+(598, 5, '', 'C', 'were required', 'require', 'are required', 'are requiring', 14, NULL),
+(599, 5, '', 'B', 'Those', 'They', 'I', 'It', 14, NULL),
+(600, 5, '', 'B', 'Hanson-Roves ensures the privacy of your health information.', 'Absences may be caused by a number of factors.', 'You should then explain why a physician’s note is not available.', 'Take note of the duties you were originally assigned.', 14, NULL),
+(601, 5, 'Where does Ms. Brown most likely work?', 'A', 'At an accounting firm', 'At an architectural firm', 'At a Web design company', 'At a market research company', 15, NULL),
+(602, 5, 'What is Ziva asked to do?', 'C', 'Reply to a text message', 'Create a portfolio', 'Set up a meeting', 'Send a work sample', 15, NULL),
+(603, 5, 'What does Mr. Muro want Ms. Santos to do?', 'A', 'Process some orders', 'Make a hiring decision', 'Reschedule a meeting', 'Talk to a job candidate', 16, NULL),
+(604, 5, 'At 9:36 A.M., what does Mr. Muro mean when he writes, “I know”?', 'A', 'He is also surprised by the company’s growth.', 'He thinks salaries should be higher.', 'He has met Ms. Crenshaw before.', 'He is certain his bus will arrive in', 16, NULL),
+(605, 5, '131.', 'A', 'have been improved', 'were improving', 'will improve', 'improved', 17, NULL),
+(606, 5, '132.', 'B', 'varying', 'varies', 'vary', 'variation', 17, NULL),
+(607, 5, '133.', 'C', 'proposal', 'contract', 'impression', 'upgrade', 17, NULL),
+(608, 5, '134.', 'C', 'Supervisors completed a tour of the plant yesterday.', 'Unfortunately, the installation cost more than we had anticipated.', 'As you are aware, our industry is increasingly competitive.', 'All personnel must be trained on the new equipment by the end of the month.', 17, NULL),
+(609, 5, '135.', 'C', 'still', 'nowhere', 'soon', 'evenly', 18, NULL),
+(610, 5, '136.', 'B', 'As a result', 'To demonstrate', 'Otherwise', 'However', 18, NULL),
+(611, 5, '137.', 'D', 'Marketing professionals give conflicting advice.', 'Traditional methods have the best impact.', 'We will develop a diverse plan for your business.', 'We have recently changed our terms of service.', 18, NULL),
+(612, 5, '138.', 'A', 'optimal', 'optimize', 'optimization', 'optimum', 18, NULL),
+(613, 5, 'According to the woman, what will happen next week?', 'A', 'A) A renovation project will begin.', 'B) A company will move to a new location.', 'C) Some technology will be updated.', 'D) Some new employees will be trained.', NULL, 4),
+(614, 5, 'What does the man recommend?', 'A', 'A) Ordering some equipment', 'B) Printing some instructions', 'C) Donating some furniture', 'D) Arranging a catered meal', NULL, 4),
+(615, 5, 'What does the woman say she will do?', 'A', 'A) Meet a client', 'B) Research some options', 'C) Make a presentation', 'D) Sign a contract', NULL, 4),
+(616, 5, 'Where do the speakers most likely work?', 'A', 'A) At a restaurant', 'B) At a farm', 'C) On a fishing boat', 'D) At a public park', NULL, 4),
+(617, 5, 'What does Brian give to Liam?', 'A', 'A) Some gloves', 'B) Some bags', 'C) A plastic bucket', 'D) A clipboard', NULL, 4),
+(618, 5, 'According to Brian, what is important?', 'A', 'A) Using sunscreen lotion', 'B) Labeling some items', 'C) Following a schedule', 'D) Drinking water', NULL, 4),
+(619, 5, 'Who most likely is the man?', 'A', 'A) An event coordinator', 'B) A book publisher', 'C) A city official', 'D) A podcast host', NULL, 4),
+(620, 5, 'What does the woman say is special about a flower?', 'A', 'A) It is resistant to insects.', 'B) It has an unusual color.', 'C) It can bloom for a long time.', 'D) It has a unique smell.', NULL, 4),
+(621, 5, 'What will happen next month?', 'A', 'A) A botanical show will be held.', 'B) A public garden will open.', 'C) An experiment will be conducted.', 'D) A gardening class will be offered.', NULL, 4),
+(622, 5, 'What does the woman propose doing?', 'A', 'A) Hiring a computer technician', 'B) Using a training application', 'C) Replacing some printers', 'D) Changing business hours', NULL, 4),
+(623, 5, 'What is the man concerned about?', 'A', 'A) Scheduling delays', 'B) Employee satisfaction', 'C) The cost of a product', 'D) The quality of a product', NULL, 4),
+(624, 5, 'According to the woman, what can be found on a Web site?', 'A', 'A) A company address', 'B) Customer reviews', 'C) A chat feature', 'D) Discount coupons', NULL, 4),
+(625, 5, 'What are the speakers mainly discussing?', 'A', 'A) A presenter at an event', 'B) End-of-year bonuses', 'C) Vacation requests', 'D) An applicant for a new role', NULL, 4),
+(626, 5, 'According to the speakers, what has Amanda Diop accomplished?', 'A', 'A) She secured a business deal.', 'B) She completed a professional certification.', 'C) She won an industry award.', 'D) She reduced production costs.', NULL, 4),
+(627, 5, 'What does the woman say she will do?', 'A', 'A) Submit some documents', 'B) Reserve a venue', 'C) Calculate a budget', 'D) Check some references', NULL, 4),
+(628, 5, 'What is the topic of the conversation?', 'A', 'A) A hiring initiative', 'B) A tax proposal', 'C) A volunteer opportunity', 'D) A community festival', NULL, 4),
+(629, 5, 'What is Ms. Haddad excited about?', 'A', 'A) Attracting international visitors', 'B) Increasing employment opportunities', 'C) Installing bicycle lanes', 'D) Improving a health-care facility', NULL, 4),
+(630, 5, 'What concern does the man point out?', 'A', 'A) Some equipment is missing.', 'B) A project may be understaffed.', 'C) Some safety guidelines are unclear.', 'D) Some parking spaces may be lost.', NULL, 4),
+(631, 5, 'Who is the woman scheduled to meet with?', 'A', 'A) A company lawyer', 'B) A senior partner', 'C) A prospective employee', 'D) A potential customer', NULL, 4),
+(632, 5, 'What does the man remind the woman about?', 'A', 'A) A luggage restriction', 'B) A required signature', 'C) An online guidebook', 'D) A refund policy', NULL, 4),
+(633, 5, 'What does the man agree to do?', 'A', 'A) Look up a phone number', 'B) Arrange for a car rental', 'C) File an expense report', 'D) Forward an e-mail', NULL, 4),
+(634, 5, 'Where are the speakers?', 'A', 'A) At an electronics store', 'B) At a trade show', 'C) At a seminar', 'D) At an award ceremony', NULL, 4),
+(635, 5, 'What does the woman mean when she says, “we have about 200 employees”?', 'A', 'A) A product would not be useful for her company.', 'B) She is looking to hire a manager.', 'C) Her business has recently become successful.', 'D) Employees will need to be trained.', NULL, 4),
+(636, 5, 'What does the man give to the woman?', 'A', 'A) A regional map', 'B) A name tag', 'C) A resume', 'D) A chart', NULL, 4),
+(637, 5, 'Who most likely are the speakers?', 'A', 'A) Plumbers', 'B) Commercial architects', 'C) Road repair contractors', 'D) Landscapers', NULL, 4),
+(638, 5, 'Why will a project be rescheduled?', 'A', 'A) Rainy weather is expected.', 'B) A design requires revisions.', 'C) Some supplies have not arrived.', 'D) A crew member is not available.', NULL, 4),
+(639, 5, 'What will the speakers most likely do on Monday?', 'A', 'A) Finalize a contract', 'B) Train some employees', 'C) Move some vehicles', 'D) Provide some consultations', NULL, 4),
+(640, 5, 'Where do the speakers most likely work?', 'A', 'A) At a bookstore', 'B) At a dry cleaning business', 'C) At a bakery', 'D) At a factory', NULL, 4),
+(641, 5, 'What does the man imply when he says, “employees have to carry the batches across the room”?', 'A', 'A) A machine is malfunctioning.', 'B) A process is time-consuming.', 'C) Salaries should be increased.', 'D) More workers should be hired.', NULL, 4),
+(642, 5, 'What will the man show the woman?', 'A', 'A) A cost estimate', 'B) A floor plan', 'C) A schedule', 'D) A catalog', NULL, 4),
+(643, 5, 'What department do the speakers work in?', 'A', 'A) Legal', 'B) ', 'C) Human Resources', 'D) Information Technology', NULL, 4),
+(644, 5, 'Look at the graphic. Which quantity needs to be changed?', 'A', 'A) 20', 'B) 35', 'C) 15', 'D) 10', NULL, 4),
+(645, 5, 'What does the woman ask about?', 'A', 'A) A refund', 'B) A signature', 'C) A meeting location', 'D) A delivery date', NULL, 4),
+(646, 5, 'What type of event are the speakers discussing?', 'A', 'A) A retirement party', 'B) A wedding', 'C) A garden show', 'D) A grand opening', NULL, 4),
+(647, 5, 'According to the woman, what has caused a problem?', 'A', 'A) An invoice error', 'B) A rainstorm', 'C) A supply shortage', 'D) A reservation cancellation', NULL, 4),
+(648, 5, 'Look at the graphic. Which flowers will be used in the arrangements?', 'A', 'A) Lilies', 'B) Tulips', 'C) Roses', 'D) Orchids', NULL, 4),
+(649, 5, 'What is the man most likely planning to do?', 'A', 'A) Sell a shop', 'B) Expand warehouse space', 'C) Replace a sign', 'D) Install air-conditioning', NULL, 4),
+(650, 5, 'Look at the graphic. Which part of the storefront does the man say is historic?', 'A', 'A) Part 1', 'B) Part 2', 'C) Part 3', 'D) Part 4', NULL, 4),
+(651, 5, 'What will the woman do next?', 'A', 'A) Recommend a paint color', 'B) Inspect some lighting', 'C) Measure a wall', 'D) Take some photographs', NULL, 4),
+(652, 5, '131', 'A', 'A) specially', 'B) specialize', 'C) special', 'D) specializing', 19, NULL),
+(653, 5, '132 ', 'B', 'A) furniture', 'B) appliances', 'C) refund', 'D) tools', 19, NULL),
+(654, 5, '133', 'C', 'A) speak', 'B) spoken', 'C) is speaking', 'D) to speak', 19, NULL),
+(655, 5, '134 ', 'D', 'A) He can schedule a convenient time.', 'B) He began working here yesterday.', 'C) He can meet you at 11:00 a.m.', 'D) He recently moved to Dellwyn.', 19, NULL),
+(656, 5, '139', 'B', 'A) agree', 'B) vary', 'C) wait', 'D) decline', 20, NULL),
+(657, 5, '140', 'C', 'A) receiving', 'B) having received', 'C) received', 'D) will be received', 20, NULL),
+(658, 5, '141', 'A', 'A) The updated price list will be available on March 20.', 'B) We apologize for this inconvenience.', 'C) Your orders will be shipped after April 17.', 'D) We are increasing prices because of rising costs.', 20, NULL),
+(659, 5, '142', 'A', 'A) exceptionally', 'B) exception', 'C) exceptional', 'D) exceptionalism', 20, NULL),
+(660, 5, '143', 'C', 'A) patients', 'B) students', 'C) customers', 'D) teammates', 21, NULL),
+(661, 5, '144', 'A', 'A) If you need more time, please let me know.', 'B) Unfortunately, I do not have adequate shelf space at this time.', 'C) I would like to show you some of my own designs.', 'D) The reasonable prices also make your pieces a great value.', 21, NULL),
+(662, 5, '145', 'D', 'A) include', 'B) double', 'C) repeat', 'D) insure', 21, NULL),
+(663, 5, '146', 'A', 'A) us', 'B) you', 'C) we', 'D) these', 21, NULL);
 
 -- --------------------------------------------------------
 
@@ -389,14 +491,52 @@ CREATE TABLE IF NOT EXISTS `exam_result` (
   `result_id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `exam_id` int(11) NOT NULL,
-  `listening_score` int(11) NOT NULL,
-  `reading_score` int(11) NOT NULL,
+  `listening_score` int(11) DEFAULT NULL,
+  `reading_score` int(11) DEFAULT NULL,
   `total_score` int(11) NOT NULL,
   `time` date NOT NULL,
   PRIMARY KEY (`result_id`),
   KEY `User_id` (`user_id`),
   KEY `FK_exam1` (`exam_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `exam_result`
+--
+
+INSERT INTO `exam_result` (`result_id`, `user_id`, `exam_id`, `listening_score`, `reading_score`, `total_score`, `time`) VALUES
+(8, 1, 1, NULL, 5, 5, '2025-05-24'),
+(9, 1, 1, NULL, 5, 5, '2025-05-24'),
+(10, 1, 1, NULL, 5, 5, '2025-05-24'),
+(11, 1, 1, NULL, 5, 5, '2025-05-24'),
+(12, 1, 1, NULL, 5, 5, '2025-05-24'),
+(13, 1, 1, NULL, 10, 10, '2025-05-24'),
+(14, 1, 1, NULL, 5, 5, '2025-05-24'),
+(15, 1, 4, 25, NULL, 25, '2025-05-24'),
+(16, 1, 4, 5, NULL, 5, '2025-05-24'),
+(17, 1, 4, 5, NULL, 5, '2025-05-24'),
+(18, 1, 5, 5, NULL, 5, '2025-05-24'),
+(19, 1, 5, 5, NULL, 5, '2025-05-24'),
+(20, 1, 5, 5, NULL, 5, '2025-05-24'),
+(21, 1, 5, 5, NULL, 5, '2025-05-24'),
+(22, 1, 5, 5, NULL, 5, '2025-05-24'),
+(23, 1, 5, 5, NULL, 5, '2025-05-24'),
+(24, 1, 5, 5, NULL, 5, '2025-05-24'),
+(25, 1, 5, 5, NULL, 5, '2025-05-24'),
+(26, 1, 5, 5, NULL, 5, '2025-05-24'),
+(27, 1, 5, 5, NULL, 5, '2025-05-24'),
+(28, 1, 5, 5, NULL, 5, '2025-05-24'),
+(29, 1, 5, 20, 5, 25, '2025-05-24'),
+(30, 1, 5, 20, 5, 25, '2025-05-24'),
+(31, 1, 5, 20, NULL, 20, '2025-05-24'),
+(32, 1, 5, 20, 5, 25, '2025-05-24'),
+(33, 1, 5, 20, 5, 25, '2025-05-24'),
+(34, 1, 4, 20, NULL, 20, '2025-05-24'),
+(35, 1, 5, 20, 5, 25, '2025-05-24'),
+(36, 1, 5, 20, 5, 25, '2025-05-24'),
+(37, 1, 5, 15, 5, 20, '2025-05-24'),
+(38, 3, 4, 20, NULL, 20, '2025-05-24'),
+(39, 3, 1, NULL, 5, 5, '2025-05-25');
 
 -- --------------------------------------------------------
 
@@ -412,7 +552,7 @@ CREATE TABLE IF NOT EXISTS `listening` (
   `audio_url` varchar(1000) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`listening_id`),
   KEY `FK` (`exam_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `listening`
@@ -421,7 +561,8 @@ CREATE TABLE IF NOT EXISTS `listening` (
 INSERT INTO `listening` (`listening_id`, `exam_id`, `content`, `audio_url`) VALUES
 (1, 4, 'Directions: You will hear some talks given by a single speaker. You will be asked to answer three questions about what the speaker says in each talk. Select the best response to each question and mark the letter (A), (B), (C), or (D) on your answer sheet. The talks will not be printed in your test book and will be spoken only one time.', 'audio/Listening_1.mp3'),
 (2, 4, 'Directions: You will hear some conversations between two or more people. You will be asked to answer three questions about what the speakers say in each conversation. Select the best response to each question and mark the letter (A), (B), (C), or (D) on your answer sheet. The conversations will not be printed in your test book and will be spoken only one time.', 'audio/Listening_2.mp3'),
-(3, 4, 'Directions: You will hear some conversations between two or more people. You will be asked to answer three questions about what the speakers say in each conversation. Select the best response to each question and mark the letter (A), (B), (C), or (D) on your answer sheet. The conversations will not be printed in your test book and will be spoken only one time.', 'audio/Listening_3.mp3');
+(3, 4, 'Directions: You will hear some conversations between two or more people. You will be asked to answer three questions about what the speakers say in each conversation. Select the best response to each question and mark the letter (A), (B), (C), or (D) on your answer sheet. The conversations will not be printed in your test book and will be spoken only one time.', 'audio/Listening_3.mp3'),
+(4, 5, 'Directions: You will hear some conversations between two or more people. You will be asked to answer three questions about what the speakers say in each conversation. Select the best response to each question and mark the letter (A), (B), (C), or (D) on your answer sheet. The conversations will not be printed in your test book and will be spoken only one time.', 'audio/Listening_full_1.mp3');
 
 -- --------------------------------------------------------
 
@@ -466,27 +607,36 @@ CREATE TABLE IF NOT EXISTS `reading_passage` (
   `passage_id` int(11) NOT NULL AUTO_INCREMENT,
   `exam_id` int(11) NOT NULL,
   `content` varchar(10000) COLLATE utf8mb4_unicode_ci NOT NULL,
-  `audio_url` varchar(1000) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`passage_id`),
   KEY `FK_Exam11` (`exam_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=22 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Đang đổ dữ liệu cho bảng `reading_passage`
 --
 
-INSERT INTO `reading_passage` (`passage_id`, `exam_id`, `content`, `audio_url`) VALUES
-(1, 1, 'LBA\r\n\r\nLocal Businesses of Albany\r\n121 S. Main St., Albany, NY 12019\r\n\r\nNovember 9\r\nDear Ms. LeChevre,\r\nWe would like to invite you to participate in our upcoming meeting, to be held on Wednesday,\r\nNovember 17 at 6:00 p.m. at the Hilton Suites. During this meeting we plan to hold an election\r\nfor the next LBA president, who will serve for the coming year. Past presidents will be present to\r\nexplain the importance of the position and to help facilitate the voting process. This year we have\r\nfour members interested in running for this position; please note that their professional profiles\r\nare attached. Make sure to review these profiles prior to the meeting. There will be a question-\r\nand-answer session with this year&#39;s candidates before voting begins.\r\nWe are anticipating a large turnout at this year&#39;s election, and hope that you will be able to join\r\nus on this important day. If, for some reason, you are unable to attend, we ask that you send in\r\nyour vote using the attached mail-in ballot. You can send the form to Local Businesses of\r\nAlbany, 121 S. Main St., Albany, NY 12019. Please make sure that your ballot arrives by\r\nNovember 17.\r\nOur bylaws state that a majority of the LBA&#39;s members must vote in the upcoming election in\r\norder for us to officially inaugurate a new president. Because of this, we ask that you make\r\nvoting a priority and either attend the meeting or send in your ballot by mail.\r\nSincerely,\r\nDavid Smith', NULL),
-(2, 1, 'RESERVATIONS\r\n\r\nTo ensure a table at SkyCity, at the top of Seattle’s Space Needle, reservations are\r\nrecommended.\r\nTo make a reservation call: 206-905-2100 or 800-938-9582.\r\nGroups are welcome but must be scheduled in advance and are limited to no more than 21\r\nguests. Parties of 10 or more cannot be accommodated May 31 through September 3.\r\nYour elevator ride and Observation Deck visit are complimentary with your reservation at\r\nSkyCity. Reservations are available for seating during the following hours:\r\nLunch Monday - Friday 11:00am – 3:00pm\r\nBrunch Saturday &amp; Sunday 10:00am – 3:00pm\r\nDinner Sunday – Thursday\r\nFriday &amp; Saturday\r\n\r\n5:00pm – 9:00pm\r\n5:00pm – 10:00pm', NULL),
-(3, 1, 'In the Reading test, you will read a variety of texts and answer several different types of reading comprehension questions. The entire Reading test will last 75 minutes. There are three parts, and directions are given for each part. You are encouraged to answer as many questions as possible within the time allowed.\r\nYou must mark your answers on the separate answer sheet. Do not write your answers in your test book.\r\nPART 5\r\nDirections: A word or phrase is missing in each of the sentences below. Four answer choices are given below each sentence. Select the best answer to complete the sentence. Then mark the letter (A), (B), (C), or (D) on your answer sheet.', NULL),
-(4, 2, 'Crescent Moon Bistro\r\nLocated along the eastern shore of Canawap Bay, the Crescent Moon Bistro is a unique venue for birthday parties, weddings, corporate gatherings, and a host of other social events. Our chefs work with you to craft a perfect menu, while our coordinators will see to it that your event is superbly organized. Rental pricing is based on the date, type of event, and number of attendees.\r\n\r\nYou are welcome to tour our facility on October 10 from 11:00 A.M. to 2:00 P.M. Meet with our coordinators and culinary staff, and sample items from our creative menu. Admission is free, but registration is required. We are offering 25% off on any booking made during this open house on October 10.', NULL),
-(5, 2, 'To: All Customers\r\nFrom: asquires@lightidea.com\r\nDate: March 6\r\nSubject: Information\r\n\r\nDear Light Idea Customers,\r\n\r\nLight Idea is enacting a price increase on select energy-efficient products, effective April 17. Specific product pricing will ____(139)_____. Please contact your sales representative for details and questions.\r\n\r\nThe last date for ordering at current prices is April 16. All orders ____(140)_____ after this date will follow the new price list ____(141)_____. Customers will be able to find this on our Web site.\r\n\r\nWe will continue to provide quality products and ____(142)_____ service to our valued customers. Thank you for your business.\r\n\r\nSincerely,\r\nArvin Squires\r\nHead of Sales, Light Idea', NULL),
-(6, 2, 'To: Jang-Ho Kwon <jkwon@newart.nz>\r\nFrom: Kenneth Okim <k.okim@okimjewelry.nz>\r\nSubject: Good news\r\nDate: 30 August\r\n\r\nDear Jang-Ho,\r\n\r\nThank you for the shipment last month of 80 units of your jewelry pieces. I am happy to report that they have been selling very well in my shop. My ____(143)_____ love the colourful designs as well as the quality of your workmanship____(144)_____.\r\n\r\nI would like to increase the number of units I order from you. Would you be able to ____(145)_____my order for the September shipment?\r\n\r\nFinally, I would like to discuss the possibility of featuring your work exclusively in my store. I believe that I could reach your target audience best and that the agreement would serve ____(146)_____both very well. I look forward to hearing from you.\r\n\r\nBest regards,\r\nKenneth Okim\r\nOkim Jewelry', NULL),
-(7, 2, 'With Global Strength Gym\'s 30-day trial period, you get the opportunity to try out our classes, equipment, and facilities ____(131)_____ . It\'s completely risk-free! To sign up, we require your contact information and payment details, but you will only be charged if you are a member for ____(132)_____ 30 days. If you decide within this time that you no longer want to be a member of Global Strength, ____(133)_____ visit our Web site at www.gsgym.com. On the Membership page, elect to ____(134)_____ your membership and enter the necessary information. It\'s that easy!', NULL),
-(8, 2, '(18 Aprii)-MKZ Foods, Inc., the region\'s largest exporter of pecans, expects its outgoing shipments to increase significantly over the next few months. This ____(143)_____ is based on the fact that the region\'s pecan farmers expanded their land area by 20 percent last year. According to spokesperson Katharina Seiler, MKZ\'s exports could reach a colossal 50,000 metric tons this year ____(144)_____\r\nMKZ buys most of the yield from the region\'s pecan farms and processes it ____(145)_____ export throughout the world. \"The availability of new land for ____(146)_____ in the region is creating opportunities for growth,\" said Ms. Seiler. \"I believe MKZ is going to have a truly outstanding year.\"', NULL),
-(9, 2, 'Gorman Unveils Newest Smartphone Model\r\nLONDON (20 April)—Gorman Mobile unveiled its newest smartphone to an eager reception at the annual Technobrit Conference. The Pro Phone 4, which includes 512 GB of storage, a 7-inch screen display, and an optional stylus pen, will hit the shelves on 11 June. Unlike its predecessor—the Pro Phone 3—it features a larger screen, an ultrawide camera lens, and 8K-resolution filming capability.\r\n\r\n—[1]—. The £999 starting price is £100 more than that of the previous model. Add-ons. such as the stylus pen. protective case, and wireless headphones, cost an additional £39. £59, and £79, respectively.\r\n\r\nGorman Product Manager Ian Hill doesn’t believe the price increase will dissuade customers. — [2] —.\r\n\r\n“The Pro Phone 4 is a game changer in terms of its picture quality and sleek design,” said Hill. “Improvements were based on direct customer feedback, which cited the poor camera functionality as the biggest drawback of prior models. Our clients spoke, and we listened and adapted accordingly.” — [3] —.\r\n\r\nOne similarity that the Pro Phone 4 has with previous models is the charger. Going against the trend of competing wireless companies, Gorman is instead focusing on convenience.\r\n\r\n“We want to afford our customers the ability to reuse elements of the other Gorman devices they’ve already purchased,” said Hill. “Why add to the overload of cables already in circulation?” — [4] —.', NULL),
-(10, 1, 'To: fcontini@attmail.com\r\nFrom: btakemoto@arolischems.co.uk\r\nDate: 15 July\r\nSubject: Your first day at Arolis\r\nDear Mr. Contini,\r\n\r\nWelcome to Arolis Chemicals! Thank you for ____(139)_____ the full-time, permanent position of laboratory assistant. We look forward to your arrival on 1 August in the Harris Building. Please report to the front desk and ask for Jack McNolan. He ____(140)_____ you to the Human Resources office. There, you will obtain your employee badge ____(141)_____ all documents necessary to start work. Note that because of its large size, the Leicester campus of Arolis can be difficult to navigate. Studying a campus map will help orient you to the location of the different buildings ____(142)_____ .\r\n\r\nShould you have any questions, please do not hesitate to contact me.\r\n\r\nSincerely,\r\n\r\nBrandon Takemoto\r\nHR Administrative Officer', NULL),
-(11, 1, 'Delroy Gerew (1:29 PM):\r\nHi, Ms. Chichester. we\'d like to order another 10 shirts, featuring the company\'s name, Magnalook, and its logo. We need four small, two medium, and four large sizes. Could you fill the order by Friday?\r\nNina Chichester (1:32 P.Nl.):\r\nThat\'s two days from today, so a $75 rush-order fee will be added.\r\nDelroy Gerew (1:34 PM):\r\nHow can we avoid the fee?\r\nNina Chichester (1:36 PM):\r\nBy choosing the standard 5-day production option. Your order would be ready Monday of next week.\r\nDelroy Gerew (1:38 P.M.):\r\nI guess it can\'t be helped. Since we have employees starting this Friday and you open at 8:00 AM, can I pick up the shirts at that time?\r\nNina Chichester (1:39 P.M.):\r\nPick-up time is normally after 1:00 PM, but I\'ll see to it they\'re ready by 8:00 AM.\r\nDelroy Gerew (1 :41 RM):\r\nThank you. Actually. my assistant will be picking them up.\r\nNina Chichester (1:42 P.M.):\r\nThat\'s fine. Could you please e-mail me your logo again? The computer on which I had it stored crashed the other day and is awaiting repair.\r\nDelroy Gerew (1:44 PM):\r\nWill do. Thanks, and please charge the credit card you have on file for us.', NULL);
+INSERT INTO `reading_passage` (`passage_id`, `exam_id`, `content`) VALUES
+(1, 1, 'LBA\r\n\r\nLocal Businesses of Albany\r\n121 S. Main St., Albany, NY 12019\r\n\r\nNovember 9\r\nDear Ms. LeChevre,\r\nWe would like to invite you to participate in our upcoming meeting, to be held on Wednesday,\r\nNovember 17 at 6:00 p.m. at the Hilton Suites. During this meeting we plan to hold an election\r\nfor the next LBA president, who will serve for the coming year. Past presidents will be present to\r\nexplain the importance of the position and to help facilitate the voting process. This year we have\r\nfour members interested in running for this position; please note that their professional profiles\r\nare attached. Make sure to review these profiles prior to the meeting. There will be a question-\r\nand-answer session with this year&#39;s candidates before voting begins.\r\nWe are anticipating a large turnout at this year&#39;s election, and hope that you will be able to join\r\nus on this important day. If, for some reason, you are unable to attend, we ask that you send in\r\nyour vote using the attached mail-in ballot. You can send the form to Local Businesses of\r\nAlbany, 121 S. Main St., Albany, NY 12019. Please make sure that your ballot arrives by\r\nNovember 17.\r\nOur bylaws state that a majority of the LBA&#39;s members must vote in the upcoming election in\r\norder for us to officially inaugurate a new president. Because of this, we ask that you make\r\nvoting a priority and either attend the meeting or send in your ballot by mail.\r\nSincerely,\r\nDavid Smith'),
+(2, 1, 'RESERVATIONS\r\n\r\nTo ensure a table at SkyCity, at the top of Seattle’s Space Needle, reservations are\r\nrecommended.\r\nTo make a reservation call: 206-905-2100 or 800-938-9582.\r\nGroups are welcome but must be scheduled in advance and are limited to no more than 21\r\nguests. Parties of 10 or more cannot be accommodated May 31 through September 3.\r\nYour elevator ride and Observation Deck visit are complimentary with your reservation at\r\nSkyCity. Reservations are available for seating during the following hours:\r\nLunch Monday - Friday 11:00am – 3:00pm\r\nBrunch Saturday &amp; Sunday 10:00am – 3:00pm\r\nDinner Sunday – Thursday\r\nFriday &amp; Saturday\r\n\r\n5:00pm – 9:00pm\r\n5:00pm – 10:00pm'),
+(3, 1, 'In the Reading test, you will read a variety of texts and answer several different types of reading comprehension questions. The entire Reading test will last 75 minutes. There are three parts, and directions are given for each part. You are encouraged to answer as many questions as possible within the time allowed.\r\nYou must mark your answers on the separate answer sheet. Do not write your answers in your test book.\r\nPART 5\r\nDirections: A word or phrase is missing in each of the sentences below. Four answer choices are given below each sentence. Select the best answer to complete the sentence. Then mark the letter (A), (B), (C), or (D) on your answer sheet.'),
+(4, 2, 'Crescent Moon Bistro\r\nLocated along the eastern shore of Canawap Bay, the Crescent Moon Bistro is a unique venue for birthday parties, weddings, corporate gatherings, and a host of other social events. Our chefs work with you to craft a perfect menu, while our coordinators will see to it that your event is superbly organized. Rental pricing is based on the date, type of event, and number of attendees.\r\n\r\nYou are welcome to tour our facility on October 10 from 11:00 A.M. to 2:00 P.M. Meet with our coordinators and culinary staff, and sample items from our creative menu. Admission is free, but registration is required. We are offering 25% off on any booking made during this open house on October 10.'),
+(5, 2, 'To: All Customers\r\nFrom: asquires@lightidea.com\r\nDate: March 6\r\nSubject: Information\r\n\r\nDear Light Idea Customers,\r\n\r\nLight Idea is enacting a price increase on select energy-efficient products, effective April 17. Specific product pricing will ____(139)_____. Please contact your sales representative for details and questions.\r\n\r\nThe last date for ordering at current prices is April 16. All orders ____(140)_____ after this date will follow the new price list ____(141)_____. Customers will be able to find this on our Web site.\r\n\r\nWe will continue to provide quality products and ____(142)_____ service to our valued customers. Thank you for your business.\r\n\r\nSincerely,\r\nArvin Squires\r\nHead of Sales, Light Idea'),
+(6, 2, 'To: Jang-Ho Kwon <jkwon@newart.nz>\r\nFrom: Kenneth Okim <k.okim@okimjewelry.nz>\r\nSubject: Good news\r\nDate: 30 August\r\n\r\nDear Jang-Ho,\r\n\r\nThank you for the shipment last month of 80 units of your jewelry pieces. I am happy to report that they have been selling very well in my shop. My ____(143)_____ love the colourful designs as well as the quality of your workmanship____(144)_____.\r\n\r\nI would like to increase the number of units I order from you. Would you be able to ____(145)_____my order for the September shipment?\r\n\r\nFinally, I would like to discuss the possibility of featuring your work exclusively in my store. I believe that I could reach your target audience best and that the agreement would serve ____(146)_____both very well. I look forward to hearing from you.\r\n\r\nBest regards,\r\nKenneth Okim\r\nOkim Jewelry'),
+(7, 2, 'With Global Strength Gym\'s 30-day trial period, you get the opportunity to try out our classes, equipment, and facilities ____(131)_____ . It\'s completely risk-free! To sign up, we require your contact information and payment details, but you will only be charged if you are a member for ____(132)_____ 30 days. If you decide within this time that you no longer want to be a member of Global Strength, ____(133)_____ visit our Web site at www.gsgym.com. On the Membership page, elect to ____(134)_____ your membership and enter the necessary information. It\'s that easy!'),
+(8, 2, '(18 Aprii)-MKZ Foods, Inc., the region\'s largest exporter of pecans, expects its outgoing shipments to increase significantly over the next few months. This ____(143)_____ is based on the fact that the region\'s pecan farmers expanded their land area by 20 percent last year. According to spokesperson Katharina Seiler, MKZ\'s exports could reach a colossal 50,000 metric tons this year ____(144)_____\r\nMKZ buys most of the yield from the region\'s pecan farms and processes it ____(145)_____ export throughout the world. \"The availability of new land for ____(146)_____ in the region is creating opportunities for growth,\" said Ms. Seiler. \"I believe MKZ is going to have a truly outstanding year.\"'),
+(9, 2, 'Gorman Unveils Newest Smartphone Model\r\nLONDON (20 April)—Gorman Mobile unveiled its newest smartphone to an eager reception at the annual Technobrit Conference. The Pro Phone 4, which includes 512 GB of storage, a 7-inch screen display, and an optional stylus pen, will hit the shelves on 11 June. Unlike its predecessor—the Pro Phone 3—it features a larger screen, an ultrawide camera lens, and 8K-resolution filming capability.\r\n\r\n—[1]—. The £999 starting price is £100 more than that of the previous model. Add-ons. such as the stylus pen. protective case, and wireless headphones, cost an additional £39. £59, and £79, respectively.\r\n\r\nGorman Product Manager Ian Hill doesn’t believe the price increase will dissuade customers. — [2] —.\r\n\r\n“The Pro Phone 4 is a game changer in terms of its picture quality and sleek design,” said Hill. “Improvements were based on direct customer feedback, which cited the poor camera functionality as the biggest drawback of prior models. Our clients spoke, and we listened and adapted accordingly.” — [3] —.\r\n\r\nOne similarity that the Pro Phone 4 has with previous models is the charger. Going against the trend of competing wireless companies, Gorman is instead focusing on convenience.\r\n\r\n“We want to afford our customers the ability to reuse elements of the other Gorman devices they’ve already purchased,” said Hill. “Why add to the overload of cables already in circulation?” — [4] —.'),
+(10, 1, 'To: fcontini@attmail.com\r\nFrom: btakemoto@arolischems.co.uk\r\nDate: 15 July\r\nSubject: Your first day at Arolis\r\nDear Mr. Contini,\r\n\r\nWelcome to Arolis Chemicals! Thank you for ____(139)_____ the full-time, permanent position of laboratory assistant. We look forward to your arrival on 1 August in the Harris Building. Please report to the front desk and ask for Jack McNolan. He ____(140)_____ you to the Human Resources office. There, you will obtain your employee badge ____(141)_____ all documents necessary to start work. Note that because of its large size, the Leicester campus of Arolis can be difficult to navigate. Studying a campus map will help orient you to the location of the different buildings ____(142)_____ .\r\n\r\nShould you have any questions, please do not hesitate to contact me.\r\n\r\nSincerely,\r\n\r\nBrandon Takemoto\r\nHR Administrative Officer'),
+(11, 1, 'Delroy Gerew (1:29 PM):\r\nHi, Ms. Chichester. we\'d like to order another 10 shirts, featuring the company\'s name, Magnalook, and its logo. We need four small, two medium, and four large sizes. Could you fill the order by Friday?\r\nNina Chichester (1:32 P.Nl.):\r\nThat\'s two days from today, so a $75 rush-order fee will be added.\r\nDelroy Gerew (1:34 PM):\r\nHow can we avoid the fee?\r\nNina Chichester (1:36 PM):\r\nBy choosing the standard 5-day production option. Your order would be ready Monday of next week.\r\nDelroy Gerew (1:38 P.M.):\r\nI guess it can\'t be helped. Since we have employees starting this Friday and you open at 8:00 AM, can I pick up the shirts at that time?\r\nNina Chichester (1:39 P.M.):\r\nPick-up time is normally after 1:00 PM, but I\'ll see to it they\'re ready by 8:00 AM.\r\nDelroy Gerew (1 :41 RM):\r\nThank you. Actually. my assistant will be picking them up.\r\nNina Chichester (1:42 P.M.):\r\nThat\'s fine. Could you please e-mail me your logo again? The computer on which I had it stored crashed the other day and is awaiting repair.\r\nDelroy Gerew (1:44 PM):\r\nWill do. Thanks, and please charge the credit card you have on file for us.'),
+(12, 5, 'In the Reading test, you will read a variety of texts and answer several different types of reading comprehension questions. The entire Reading test will last 75 minutes. There are three parts, and directions are given for each part. You are encouraged to answer as many questions as possible within the time allowed.\r\nYou must mark your answers on the separate answer sheet. Do not write your answers in your test book.\r\nPART 5\r\nDirections: A word or phrase is missing in each of the sentences below. Four answer choices are given below each sentence. Select the best answer to complete the sentence. Then mark the letter (A), (B), (C), or (D) on your answer sheet.'),
+(13, 5, 'With Global Strength Gym\'s 30-day trial period, you get the opportunity to try out our classes, equipment, and facilities ____(131)_____ . It\'s completely risk-free! To sign up, we require your contact information and payment details, but you will only be charged if you are a member for ____(132)_____ 30 days. If you decide within this time that you no longer want to be a member of Global Strength, ____(133)_____ visit our Web site at www.gsgym.com. On the Membership page, elect to ____(134)_____ your membership and enter the necessary information. It\'s that easy!'),
+(14, 5, 'As a Hanson-Roves employee, you are entitled to sick absences, during which you will be paid for time off work for health ____(135)_____. To avoid deductions to your pay you ____(136)_____ to provide a physician-signed note as documentation of your illness ____(137)_____ should include the date you were seen by the doctor, a statement certifying that you are unable to perform the duties of your position, and your expected date of return. Your supervisor will then forward the documentation to Human Resources ____(138)_____. Employee health records can be accessed only by those with a valid business reason for reviewing them.'),
+(15, 5, 'Chakia Brown [3:32 P.M.]\r\nHi, Ziva. I just met with the Han board of directors, and they\'re interested in our redesign proposal for their downtown office buildings. Amy Han asked for another work sample, but I didn\'t have the right portfolio with me. I\'m heading to another meeting, so please have a messenger deliver a copy of the Grainger Centre files to her. Include the full set of plans. Thanks!'),
+(16, 5, 'Louisa Santos 9:30A.M.\r\nKenji, where are you? The job candidates are here.\r\nKenji Muro 9:31A.M.\r\nSorry! The bridge is closed. My bus had to take a detour. I should be there in 30 minutes. Please start without me.\r\nLouisa Santos 9:34A.M.\r\nOK. I\'m going to interview Elena Crenshaw first.\r\nKenji Muro 9:34A.M.\r\nGood. She\'s the one with experience at another T-shirt company.\r\nLouisa Santos 9:35A.M.\r\nYes. Can you believe our small company has grown so much that we need to hire someone just to process orders?\r\nKenji Muro 9:36A.M.\r\nI know! OK. I\'ll see you soon.'),
+(17, 5, 'We are pleased to announce that the installation of the new manufacturing equipment in our main plant has been completed. The new machines ____(131)_____ work flow by allowing for flexibility in production. With six mixing tanks of ____(132)_____ sizes, we expect to be able to fill a wider range of orders, from small to very large. This ____(133)_____ is an important way to ensure that Balm Manufacturing continues to be a leader in the fragrance industry. ____(134)_____. Jim Martel, who is organizing this effort, will contact each of you soon with details.'),
+(18, 5, 'Marketing your business can be confusing. Newspapers and magazines are ____(135)_____ useful venues for advertising ____(136)_____, social media platforms have become even more critical marketing outlets. Kate Wei Communications utilizes both traditional outlets and the latest communication platforms ____(137)_____. In addition to exceptional print services, Kate Wei Communications has the expertise to help you ____(138)_____ your online presence. Why wait? Choose our award-winning firm to strengthen your company\'s image today!'),
+(19, 5, 'To: Myung-Hee Hahn\r\nFrom: Dellwyn Home Store\r\nDate: January 15\r\nSubject: Order update\r\n\r\nDear Ms. Hahn,\r\n\r\nYour ____(131)_____ order of a red oak dining table and six matching chairs arrived at our store this morning. We would now like to arrange for the delivery of the ____(132)_____. Please call us at 517-555-0188 and ask ____(133)_____ to Coleman Cobb, our delivery manager ____(134)_____\r\n\r\nCustomer Service, Dellwyn Home Store'),
+(20, 5, 'To: All Customers\r\nFrom: asquires@lightidea.com\r\nDate: March 6\r\nSubject: Information\r\n\r\nDear Light Idea Customers,\r\n\r\nLight Idea is enacting a price increase on select energy-efficient products, effective April 17. Specific product pricing will ____(139)_____. Please contact your sales representative for details and questions.\r\n\r\nThe last date for ordering at current prices is April 16. All orders ____(140)_____ after this date will follow the new price list ____(141)_____. Customers will be able to find this on our Web site.\r\n\r\nWe will continue to provide quality products and ____(142)_____ service to our valued customers. Thank you for your business.\r\n\r\nSincerely,\r\nArvin Squires\r\nHead of Sales, Light Idea'),
+(21, 5, '\r\nTo: Jang-Ho Kwon <jkwon@newart.nz>\r\nFrom: Kenneth Okim <k.okim@okimjewelry.nz>\r\nSubject: Good news\r\nDate: 30 August\r\n\r\nDear Jang-Ho,\r\n\r\nThank you for the shipment last month of 80 units of your jewelry pieces. I am happy to report that they have been selling very well in my shop. My ____(143)_____ love the colourful designs as well as the quality of your workmanship____(144)_____.\r\n\r\nI would like to increase the number of units I order from you. Would you be able to ____(145)_____my order for the September shipment?\r\n\r\nFinally, I would like to discuss the possibility of featuring your work exclusively in my store. I believe that I could reach your target audience best and that the agreement would serve ____(146)_____both very well. I look forward to hearing from you.\r\n\r\nBest regards,\r\nKenneth Okim\r\nOkim Jewelry');
 
 -- --------------------------------------------------------
 
