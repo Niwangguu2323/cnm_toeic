@@ -560,7 +560,7 @@ foreach ($questions as $q) {
                                 </audio>
                                 
                                 <?php foreach ($grouped_listening_questions[$lid] ?? [] as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endforeach; ?>
@@ -620,7 +620,7 @@ foreach ($questions as $q) {
                                     <?= nl2br(htmlspecialchars($content)) ?>
                                 </div>
                                 <?php foreach ($grouped_questions[$pid] ?? [] as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results,$is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endforeach; ?>
