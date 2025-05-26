@@ -110,7 +110,7 @@ error_reporting(0);
                                 <h1 class="display-3 text-white animated slideInDown">Hệ thống hỗ trợ luyện thi Toeic 2 kỹ năng</h1>
                                 <p class="fs-5 text-white mb-4 pb-2">Ôn luyện thông minh - điểm số vượt trội!</p>
                                 <a href="templates/about.php" class="btn btn-primary py-md-3 px-md-5 me-3 animated slideInLeft">Về chúng tôi</a>
-                                <a href="#" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Đăng ký ngay</a>
+                                <a href="templates/register.php" class="btn btn-light py-md-3 px-md-5 animated slideInRight">Đăng ký ngay</a>
                             </div>
                         </div>
                     </div>
@@ -130,7 +130,7 @@ error_reporting(0);
                         <div class="p-4">
                             <i class="fa fa-3x fa-globe text-primary mb-4"></i>
                             <h5 class="mb-3">Chào mừng bạn</h5>
-                            <p>Hướng dẫn chi tiết cho bạn lần đầu đến với hệ thống</p>
+                            <p>Hướng dẫn cho bạn lần đầu đến với hệ thống</p>
                         </div>
                     </div>
                 </div>
@@ -241,11 +241,11 @@ error_reporting(0);
             <div class="row g-5">
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-3">Menu</h4>
-                    <a class="btn btn-link" href="">Trang chủ</a>
-                    <a class="btn btn-link" href="">Về chúng tôi</a>
-                    <a class="btn btn-link" href="">Luyện tập kĩ năng nghe</a>
-                    <a class="btn btn-link" href="">Luyện tập kĩ năng đọc</a>
-                    <a class="btn btn-link" href="">Làm bài thi</a>
+                    <a class="btn btn-link" href="index.php">Trang chủ</a>
+                    <a class="btn btn-link" href="templates/about.php">Về chúng tôi</a>
+                    <a class="btn btn-link" href="templates/listening.php">Luyện tập kĩ năng nghe</a>
+                    <a class="btn btn-link" href="templates/reading.php">Luyện tập kĩ năng đọc</a>
+                    <a class="btn btn-link" href="templates/test.php">Làm bài thi</a>
                 </div>
                 <div class="col-lg-3 col-md-6">
                     <h4 class="text-white mb-3">Liên hệ</h4>
@@ -262,7 +262,7 @@ error_reporting(0);
                     <p>Đến với 2N Toeic Lab nào!!!</p>
                     <div class="position-relative mx-auto" style="max-width: 400px;">
                         <input class="form-control border-0 w-100 py-3 ps-4 pe-5" type="text" placeholder="Email của bạn">
-                        <button type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2">Đăng ký</button>
+                        <a type="button" class="btn btn-primary py-2 position-absolute top-0 end-0 mt-2 me-2" href="templates/register.php">Đăng ký</a>
                     </div>
                 </div>
             </div>
