@@ -2,6 +2,10 @@
 session_start();
 require_once __DIR__ . '/../models/ExamModel.php';
 require_once __DIR__ . '/../services/nlp_helper.php';
+require_once __DIR__ . '/../services/exam_content_service.php';
+require_once __DIR__ . '/../services/keyword_service.php';
+require_once __DIR__ . '/../services/enhanced_question_renderer.php';
+require_once __DIR__ . '/../models/PracticeModeModel.php';
 
 $model = new ExamModel();
 $exam_id = $_GET['id'] ?? 0;
@@ -17,9 +21,17 @@ if (!$exam) {
     exit;
 }
 
+// Khởi tạo services
+$examContentService = new ExamContentService();
+$keywordService = new KeywordService();
+$enhancedRenderer = new EnhancedQuestionRenderer();
+
 // Xác định chế độ thi (practice hoặc exam)
 $exam_mode = NLPHelper::determineExamMode($exam);
 $is_practice_mode = ($exam_mode === 'practice');
+
+// Cache cho NLP results để tối ưu hiệu suất
+$nlp_cache = [];
 
 // HÀM QUY ĐỔI ĐIỂM THEO BẢNG TOEIC
 function quyDoiDiemReading($soCauDung) {
@@ -68,108 +80,20 @@ function quyDoiDiemListening($soCauDung) {
     return $bangDiem[min(100, max(0, $soCauDung))];
 }
 
-// Hàm render câu hỏi với kết quả và NLP highlighting
-function renderQuestionWithResults($q, $cauSo, $detailed_results, $show_results, $is_practice_mode) {
-    $qid = $q['question_id'];
-    $user_answer = $detailed_results[$qid]['user_answer'] ?? null;
-    $correct_answer = $detailed_results[$qid]['correct_answer'] ?? $q['correct_answer'];
-    $is_correct = $detailed_results[$qid]['is_correct'] ?? null;
+// Hàm cache NLP results để tối ưu hiệu suất
+function getCachedNLPResult($text, $mode, &$cache, $keywordService) {
+    $cache_key = md5($text . $mode);
     
-    // Xử lý NLP cho nội dung câu hỏi
-    $question_content = $q['content'];
-    if ($is_practice_mode && !$show_results) {
-        $question_content = NLPHelper::processText($question_content, 'practice');
-    } else {
-        $question_content = htmlspecialchars($q['content']);
+    if (!isset($cache[$cache_key])) {
+        $cache[$cache_key] = $keywordService->analyzeAndHighlight($text, $mode);
     }
     
-    ob_start(); // Bắt đầu output buffering
-    ?>
-    <div class="question-container animate-fade-in">
-        <div class="d-flex align-items-start">
-            <div class="question-number"><?= $cauSo ?></div>
-            <div class="flex-grow-1">
-                <div class="question-text">
-                    <?= htmlspecialchars($q['content']) ?>
-                    <?php if ($show_results && $is_correct !== null): ?>
-                        <span class="correct-answer-indicator">
-                            <i class="fas fa-<?= $is_correct ? 'check' : 'times' ?>"></i>
-                            <?= $is_correct ? 'Đúng' : 'Sai' ?>
-                        </span>
-                    <?php endif; ?>
-                </div>
-                <div class="option-group">
-                    <?php foreach (['A','B','C','D'] as $i => $opt): 
-                        $is_user_choice = ($user_answer === $opt);
-                        $is_correct_choice = ($correct_answer === $opt);
-                        
-                        $option_class = '';
-                        if ($show_results) {
-                            if ($is_correct_choice && $is_user_choice) {
-                                // Đáp án đúng và được chọn - màu xanh
-                                $option_class = 'result-option correct';
-                            } elseif ($is_correct_choice && !$is_user_choice) {
-                                // Đáp án đúng nhưng không được chọn - màu vàng
-                                $option_class = 'result-option correct-not-selected';
-                            } elseif ($is_user_choice && !$is_correct_choice) {
-                                // Đáp án sai được chọn - màu đỏ
-                                $option_class = 'result-option incorrect';
-                            } else {
-                                // Đáp án không được chọn - mờ đi
-                                $option_class = 'result-option not-selected';
-                            }
-                        }
-                    ?>
-                        <div class="option-item">
-                            <input type="radio" 
-                                   name="<?= $q['question_id'] ?>" 
-                                   value="<?= $opt ?>" 
-                                   id="q<?= $q['question_id'] . $opt ?>" 
-                                   <?= $show_results ? 'disabled' : 'disabled' ?>
-                                   <?= $is_user_choice ? 'checked' : '' ?>>
-                            <label class="option-label <?= $option_class ?>" for="q<?= $q['question_id'] . $opt ?>">
-                                <div class="option-letter"><?= $opt ?></div>
-                                <div><?= htmlspecialchars($q["option_" . ($i + 1)]) ?></div>
-                                <?php if ($show_results): ?>
-                                    <?php if ($is_correct_choice && $is_user_choice): ?>
-                                        <div class="result-icon correct">
-                                            <i class="fas fa-check-circle"></i>
-                                        </div>
-                                    <?php elseif ($is_correct_choice && !$is_user_choice): ?>
-                                        <div class="result-icon" style="color: #f59e0b;">
-                                            <i class="fas fa-exclamation-circle"></i>
-                                        </div>
-                                    <?php elseif ($is_user_choice && !$is_correct_choice): ?>
-                                        <div class="result-icon incorrect">
-                                            <i class="fas fa-times-circle"></i>
-                                        </div>
-                                    <?php endif; ?>
-                                <?php endif; ?>
-                            </label>
-                        </div>
-                    <?php endforeach; ?>
-                </div>
-                
-                <?php if ($show_results && $is_correct !== null): ?>
-                    <div class="question-result-summary <?= $is_correct ? 'correct' : 'incorrect' ?>">
-                        <div class="d-flex align-items-center gap-2">
-                            <i class="fas fa-<?= $is_correct ? 'check-circle' : 'times-circle' ?> 
-                               text-<?= $is_correct ? 'success' : 'danger' ?>"></i>
-                            <strong>
-                                <?php if ($is_correct): ?>
-                                    Chính xác! Bạn đã chọn đáp án đúng.
-                                <?php else: ?>
-                                    Bạn đã chọn: <?= $user_answer ?> | Đáp án đúng: <?= $correct_answer ?>
-                                <?php endif; ?>
-                            </strong>
-                        </div>
-                    </div>
-                <?php endif; ?>
-            </div>
-        </div>
-    </div>
-    <?php
-    return ob_get_clean(); // Trả về nội dung đã buffer
+    return $cache[$cache_key];
+}
+
+// Hàm render câu hỏi với kết quả và NLP highlighting - SỬ DỤNG SERVICE
+function renderQuestionWithResults($q, $cauSo, $detailed_results, $show_results, $is_practice_mode, $examContentService) {
+    return $examContentService->renderQuestionWithResults($q, $cauSo, $detailed_results, $show_results, $is_practice_mode);
 }
 
 // CHẤM ĐIỂM
@@ -349,13 +273,18 @@ foreach ($questions as $q) {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Animate.css -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    <!-- Thêm vào phần head -->
+    <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
     
-  <!-- Template Stylesheet -->
+    <!-- Template Stylesheet -->
     <link href="../public/css/examdetails_style.css" rel="stylesheet">
+    <!-- Enhanced NLP Styles -->
+    <link href="../public/css/enhanced_nlp_styles.css" rel="stylesheet">
+    
+    <!-- NLP Styles -->
+    <?= $keywordService->getHighlightStyles() ?>
 </head>
-<body>
+<body data-exam-mode="<?= $exam_mode ?>">
     <!-- Navbar Start -->
     <nav class="navbar navbar-expand-lg bg-white navbar-light shadow sticky-top p-0">
         <a href="index.php" class="navbar-brand d-flex align-items-center px-4 px-lg-5">
@@ -421,6 +350,12 @@ foreach ($questions as $q) {
                             <i class="fas fa-signal"></i>
                             <span>Độ khó: <?= $exam['difficulty_level'] ?></span>
                         </div>
+                        <?php if ($is_practice_mode): ?>
+                        <div class="exam-meta-item">
+                            <i class="fas fa-brain"></i>
+                            <span class="text-success">Chế độ luyện tập</span>
+                        </div>
+                        <?php endif; ?>
                     </div>
                     
                     <?php if ($exam['type'] === 'Full'): ?>
@@ -440,13 +375,9 @@ foreach ($questions as $q) {
             <div class="content-wrapper">
                 <!-- Practice Mode Indicator -->
                 <?php if ($is_practice_mode && !$show_results): ?>
-                    <div class="practice-mode-indicator animate__animated animate__bounceIn">
-                        <h5><i class="fas fa-lightbulb me-2"></i>Chế độ luyện thi - Từ khóa quan trọng đã được highlight</h5>
-                        <p class="mb-0">Các từ khóa TOEIC, từ nối và từ chỉ thị quan trọng sẽ được đánh dấu màu để giúp bạn học tập hiệu quả hơn.</p>
-                    </div> </br></br>
-                    
-                    <!-- Keyword Legend -->
-                    <?= NLPHelper::getStyles() ?>
+                    <?= PracticeModeModel::renderPracticeModeIndicator() ?>
+                    <?= PracticeModeModel::renderAdvancedFeaturesPanel() ?>
+                    <?= PracticeModeModel::renderDetailedKeywordLegend() ?>
                 <?php endif; ?>
 
                 <!-- Result Display -->
@@ -471,7 +402,7 @@ foreach ($questions as $q) {
                 <div class="action-buttons">
                     <?php if (!$show_results): ?>
                         <a href="?id=<?= $exam_id ?>&mode=practice" class="btn btn-modern <?= $is_practice_mode ? 'btn-success' : 'btn-outline-success' ?>">
-                            <i class="fas fa-graduation-cap me-2"></i>Chế độ luyện thi
+                            <i class="fas fa-graduation-cap me-2"></i>Chế độ luyện tập
                         </a>
                         <a href="?id=<?= $exam_id ?>&mode=exam" class="btn btn-modern <?= !$is_practice_mode ? 'btn-danger' : 'btn-outline-danger' ?>">
                             <i class="fas fa-clock me-2"></i>Chế độ thi thật
@@ -545,22 +476,16 @@ foreach ($questions as $q) {
                                         <small class="text-muted">Nghe và trả lời các câu hỏi</small>
                                     </div>
                                 </div>
-                                <?php 
-                                // Xử lý NLP cho nội dung listening
-                                if ($is_practice_mode && !$show_results) {
-                                    echo NLPHelper::processText($info['content'], 'practice');
-                                } else {
-                                    echo nl2br(htmlspecialchars($info['content']));
-                                }
-                                ?>
-                                <p class="mb-3"><?= nl2br(htmlspecialchars($info['content'])) ?></p>
+                                <div class="listening-content">
+                                    <?= $examContentService->processListeningContent($info['content'], $is_practice_mode, $show_results) ?>
+                                </div>
                                 <audio controls class="audio-player">
                                     <source src="../public/<?= htmlspecialchars($info['audio_url']) ?>" type="audio/mpeg">
                                     Trình duyệt của bạn không hỗ trợ phát audio.
                                 </audio>
                                 
                                 <?php foreach ($grouped_listening_questions[$lid] ?? [] as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
+                                    <?php echo $enhancedRenderer->renderEnhancedQuestionWithNLP($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endforeach; ?>
@@ -590,7 +515,7 @@ foreach ($questions as $q) {
                                     </div>
                                 </div>
                                 <?php foreach ($no_passage_questions as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results); ?>
+                                    <?php echo $enhancedRenderer->renderEnhancedQuestionWithNLP($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
@@ -606,21 +531,12 @@ foreach ($questions as $q) {
                                         <small class="text-muted">Đọc đoạn văn và trả lời câu hỏi</small>
                                     </div>
                                 </div>
-                                <div>
-                                    <?php 
-                                    // Xử lý NLP cho passage content
-                                    if ($is_practice_mode && !$show_results) {
-                                        echo NLPHelper::processText($content, 'practice');
-                                    } else {
-                                        echo nl2br(htmlspecialchars($content));
-                                    }
-                                    ?>
-                                </div>
                                 <div class="passage-content">
-                                    <?= nl2br(htmlspecialchars($content)) ?>
+                                    <?= $examContentService->processPassageContent($content, $is_practice_mode, $show_results) ?>
+                                </div_practice_mode, $show_results) ?>
                                 </div>
                                 <?php foreach ($grouped_questions[$pid] ?? [] as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results,$is_practice_mode); ?>
+                                    <?php echo $enhancedRenderer->renderEnhancedQuestionWithNLP($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endforeach; ?>
@@ -650,7 +566,7 @@ foreach ($questions as $q) {
                                     </div>
                                 </div>
                                 <?php foreach ($no_passage_questions as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
+                                    <?php echo $enhancedRenderer->renderEnhancedQuestionWithNLP($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endif; ?>
@@ -666,21 +582,11 @@ foreach ($questions as $q) {
                                         <small class="text-muted">Đọc đoạn văn và trả lời câu hỏi</small>
                                     </div>
                                 </div>
-                                <div>
-                                    <?php 
-                                    // Xử lý NLP cho passage content
-                                    if ($is_practice_mode && !$show_results) {
-                                        echo NLPHelper::processText($content, 'practice');
-                                    } else {
-                                        echo nl2br(htmlspecialchars($content));
-                                    }
-                                    ?>
-                                </div>
                                 <div class="passage-content">
-                                    <?= nl2br(htmlspecialchars($content)) ?>
+                                    <?= $examContentService->processPassageContent($content, $is_practice_mode, $show_results) ?>
                                 </div>
                                 <?php foreach ($grouped_questions[$pid] ?? [] as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
+                                    <?php echo $enhancedRenderer->renderEnhancedQuestionWithNLP($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endforeach; ?>
@@ -709,22 +615,16 @@ foreach ($questions as $q) {
                                         <small class="text-muted">Nghe và trả lời các câu hỏi</small>
                                     </div>
                                 </div>
-                                    <?php 
-                                    // Xử lý NLP cho nội dung listening
-                                    if ($is_practice_mode && !$show_results) {
-                                        echo NLPHelper::processText($info['content'], 'practice');
-                                    } else {
-                                        echo nl2br(htmlspecialchars($info['content']));
-                                    }
-                                    ?>
-                                <p class="mb-3"><?= nl2br(htmlspecialchars($info['content'])) ?></p>
+                                <div class="listening-content">
+                                    <?= $examContentService->processListeningContent($info['content'], $is_practice_mode, $show_results) ?>
+                                </div>
                                 <audio controls class="audio-player">
                                     <source src="../public/<?= htmlspecialchars($info['audio_url']) ?>" type="audio/mpeg">
                                     Trình duyệt của bạn không hỗ trợ phát audio.
                                 </audio>
                                 
                                 <?php foreach ($grouped_listening_questions[$lid] ?? [] as $q): ?>
-                                    <?php echo renderQuestionWithResults($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
+                                    <?php echo $enhancedRenderer->renderEnhancedQuestionWithNLP($q, $cauSo++, $detailed_results, $show_results, $is_practice_mode); ?>
                                 <?php endforeach; ?>
                             </div>
                         <?php endforeach; ?>
@@ -736,77 +636,78 @@ foreach ($questions as $q) {
                         </button>
                     </div>
                 </form>
+                
                 <?php if ($show_results): ?>
-    <!-- Results Legend -->
-    <div class="results-legend animate__animated animate__fadeInUp">
-        <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Chú thích kết quả</h5>
-        <div class="row">
-            <div class="col-md-3">
-                <div class="legend-item">
-                    <div class="legend-color correct">
-                        <i class="fas fa-check"></i>
+                    <!-- Results Legend -->
+                    <div class="results-legend animate__animated animate__fadeInUp">
+                        <h5 class="mb-3"><i class="fas fa-info-circle me-2"></i>Chú thích kết quả</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="legend-item">
+                                    <div class="legend-color correct">
+                                        <i class="fas fa-check"></i>
+                                    </div>
+                                    <span>Đáp án đúng bạn chọn</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="legend-item">
+                                    <div class="legend-color correct-not-selected">
+                                        <i class="fas fa-exclamation"></i>
+                                    </div>
+                                    <span>Đáp án đúng bạn bỏ lỡ</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="legend-item">
+                                    <div class="legend-color incorrect">
+                                        <i class="fas fa-times"></i>
+                                    </div>
+                                    <span>Đáp án bạn chọn sai</span>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="legend-item">
+                                    <div class="legend-color not-answered">
+                                        <i class="fas fa-minus"></i>
+                                    </div>
+                                    <span>Đáp án không được chọn</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <span>Đáp án đúng bạn chọn</span>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="legend-item">
-                    <div class="legend-color correct-not-selected">
-                        <i class="fas fa-exclamation"></i>
-                    </div>
-                    <span>Đáp án đúng bạn bỏ lỡ</span>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="legend-item">
-                    <div class="legend-color incorrect">
-                        <i class="fas fa-times"></i>
-                    </div>
-                    <span>Đáp án bạn chọn sai</span>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="legend-item">
-                    <div class="legend-color not-answered">
-                        <i class="fas fa-minus"></i>
-                    </div>
-                    <span>Đáp án không được chọn</span>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Detailed Summary -->
-    <div class="results-summary-card animate__animated animate__fadeInUp">
-        <h4 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Thống kê chi tiết</h4>
-        <div class="summary-stats">
-            <?php 
-            $total_questions = count($detailed_results);
-            $correct_count = array_sum(array_column($detailed_results, 'is_correct'));
-            $incorrect_count = $total_questions - $correct_count;
-            $accuracy = $total_questions > 0 ? round(($correct_count / $total_questions) * 100, 1) : 0;
-            ?>
-            <div class="stat-item">
-                <div class="stat-number total"><?= $total_questions ?></div>
-                <div class="stat-label">Tổng số câu</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number correct"><?= $correct_count ?></div>
-                <div class="stat-label">Câu đúng</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number incorrect"><?= $incorrect_count ?></div>
-                <div class="stat-label">Câu sai</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number" style="color: <?= $accuracy >= 70 ? '#16a34a' : ($accuracy >= 50 ? '#d97706' : '#dc2626') ?>">
-                    <?= $accuracy ?>%
-                </div>
-                <div class="stat-label">Độ chính xác</div>
-            </div>
-        </div>
-    </div>
-<?php endif; ?>
+                    <!-- Detailed Summary -->
+                    <div class="results-summary-card animate__animated animate__fadeInUp">
+                        <h4 class="mb-3"><i class="fas fa-chart-bar me-2"></i>Thống kê chi tiết</h4>
+                        <div class="summary-stats">
+                            <?php 
+                            $total_questions = count($detailed_results);
+                            $correct_count = array_sum(array_column($detailed_results, 'is_correct'));
+                            $incorrect_count = $total_questions - $correct_count;
+                            $accuracy = $total_questions > 0 ? round(($correct_count / $total_questions) * 100, 1) : 0;
+                            ?>
+                            <div class="stat-item">
+                                <div class="stat-number total"><?= $total_questions ?></div>
+                                <div class="stat-label">Tổng số câu</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number correct"><?= $correct_count ?></div>
+                                <div class="stat-label">Câu đúng</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number incorrect"><?= $incorrect_count ?></div>
+                                <div class="stat-label">Câu sai</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" style="color: <?= $accuracy >= 70 ? '#16a34a' : ($accuracy >= 50 ? '#d97706' : '#dc2626') ?>">
+                                    <?= $accuracy ?>%
+                                </div>
+                                <div class="stat-label">Độ chính xác</div>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -865,24 +766,22 @@ foreach ($questions as $q) {
     <!-- JavaScript Libraries -->
     <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Enhanced NLP Features JavaScript -->
+    <script src="../public/js/enhanced_nlp_features.js"></script>
 
     <script>
-        // Start Exam Function
+        // Original exam functionality scripts
         document.getElementById('startExamBtn')?.addEventListener('click', function () {
-            // Hide start button, show submit button
             this.classList.add('d-none');
             document.getElementById('submitExamBtn').classList.remove('d-none');
 
-            // Enable all radio buttons
             document.querySelectorAll('input[type=radio]').forEach(input => {
                 input.disabled = false;
             });
 
-            // Show timer and progress
             document.getElementById('countdown-timer').style.display = 'block';
             document.getElementById('progress-container').style.display = 'block';
 
-            // Start countdown timer
             let durationMinutes = <?= (int) $exam['duration_minutes'] ?>;
             let remainingTime = durationMinutes * 60;
             const totalTime = remainingTime;
@@ -894,13 +793,11 @@ foreach ($questions as $q) {
                 timerDisplay.textContent = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
                 remainingTime--;
 
-                // Update progress bar
                 const progress = ((totalTime - remainingTime) / totalTime) * 100;
                 document.getElementById('progress-fill').style.width = progress + '%';
                 document.getElementById('progress-text').textContent = Math.round(progress) + '%';
 
-                // Change timer color when time is running low
-                if (remainingTime < 300) { // Last 5 minutes
+                if (remainingTime < 300) {
                     timerDisplay.parentElement.parentElement.style.background = 'linear-gradient(135deg, #dc2626, #ef4444)';
                 }
 
@@ -912,7 +809,6 @@ foreach ($questions as $q) {
                 }
             }, 1000);
 
-            // Add animation to question containers
             const questionContainers = document.querySelectorAll('.question-container');
             questionContainers.forEach((container, index) => {
                 setTimeout(() => {
@@ -920,7 +816,6 @@ foreach ($questions as $q) {
                 }, index * 100);
             });
 
-            // Smooth scroll to first question
             setTimeout(() => {
                 const firstQuestion = document.querySelector('.question-container');
                 if (firstQuestion) {
@@ -929,7 +824,6 @@ foreach ($questions as $q) {
             }, 500);
         });
 
-        // Progress tracking
         document.addEventListener('change', function(e) {
             if (e.target.type === 'radio') {
                 updateProgress();
@@ -937,7 +831,7 @@ foreach ($questions as $q) {
         });
 
         function updateProgress() {
-            const totalQuestions = document.querySelectorAll('input[type="radio"][name]').length / 4; // 4 options per question
+            const totalQuestions = document.querySelectorAll('input[type="radio"][name]').length / 4;
             const answeredQuestions = new Set();
             
             document.querySelectorAll('input[type="radio"]:checked').forEach(input => {
@@ -949,31 +843,6 @@ foreach ($questions as $q) {
             document.getElementById('progress-text').textContent = Math.round(progressPercentage) + '%';
         }
 
-        // Smooth scrolling for navigation
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Auto-save functionality (optional)
-        let autoSaveInterval;
-        function startAutoSave() {
-            autoSaveInterval = setInterval(() => {
-                const formData = new FormData(document.getElementById('submitForm'));
-                // You can implement auto-save to localStorage or server here
-                console.log('Auto-saving progress...');
-            }, 30000); // Auto-save every 30 seconds
-        }
-
-        // Confirmation before leaving page
         window.addEventListener('beforeunload', function (e) {
             const hasStarted = document.getElementById('startExamBtn').classList.contains('d-none');
             if (hasStarted && !document.getElementById('submitForm').submitted) {
@@ -982,49 +851,19 @@ foreach ($questions as $q) {
             }
         });
 
-        // Mark form as submitted when submitting
         document.getElementById('submitForm').addEventListener('submit', function() {
             this.submitted = true;
         });
 
-        // Add hover effects to options
-        document.addEventListener('DOMContentLoaded', function() {
-            const optionLabels = document.querySelectorAll('.option-label');
-            optionLabels.forEach(label => {
-                label.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateX(5px)';
-                });
-                label.addEventListener('mouseleave', function() {
-                    if (!this.previousElementSibling.checked) {
-                        this.style.transform = 'translateX(0)';
-                    }
-                });
-            });
-        });
-
-        // Keyboard navigation
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                const submitBtn = document.getElementById('submitExamBtn');
-                if (!submitBtn.classList.contains('d-none')) {
-                    submitBtn.click();
-                }
-            }
-        });
-
-        // Add visual feedback for selected answers
         document.addEventListener('change', function(e) {
             if (e.target.type === 'radio') {
-                // Remove previous selection styling
                 const questionContainer = e.target.closest('.question-container');
                 questionContainer.querySelectorAll('.option-label').forEach(label => {
                     label.classList.remove('selected');
                 });
                 
-                // Add styling to selected option
                 e.target.nextElementSibling.classList.add('selected');
                 
-                // Add completion checkmark to question number
                 const questionNumber = questionContainer.querySelector('.question-number');
                 if (!questionNumber.querySelector('.fa-check')) {
                     questionNumber.innerHTML += ' <i class="fas fa-check" style="font-size: 0.8rem;"></i>';
@@ -1032,55 +871,50 @@ foreach ($questions as $q) {
             }
         });
 
-// Ẩn nút bắt đầu nếu đã có kết quả
-<?php if ($show_results): ?>
-document.addEventListener('DOMContentLoaded', function() {
-    const startBtn = document.getElementById('startExamBtn');
-    const submitBtn = document.getElementById('submitExamBtn');
-    if (startBtn) startBtn.style.display = 'none';
-    if (submitBtn) submitBtn.style.display = 'none';
-    
-    // Scroll to results
-    const resultContainer = document.querySelector('.result-container');
-    if (resultContainer) {
-        setTimeout(() => {
-            resultContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 500);
-    }
-});
-<?php endif; ?>
-
-// Back to Top functionality
-document.addEventListener('DOMContentLoaded', function() {
-    const backToTopBtn = document.getElementById('backToTop');
-    
-    // Show/hide button based on scroll position
-    window.addEventListener('scroll', function() {
-        if (window.pageYOffset > 300) {
-            backToTopBtn.style.display = 'flex';
-            backToTopBtn.style.opacity = '1';
-        } else {
-            backToTopBtn.style.opacity = '0';
-            setTimeout(() => {
-                if (window.pageYOffset <= 300) {
-                    backToTopBtn.style.display = 'none';
-                }
-            }, 300);
-        }
-    });
-    
-    // Smooth scroll to top
-    backToTopBtn.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.scrollTo({
-            top: 0,
-            behavior: 'smooth'
+        <?php if ($show_results): ?>
+        document.addEventListener('DOMContentLoaded', function() {
+            const startBtn = document.getElementById('startExamBtn');
+            const submitBtn = document.getElementById('submitExamBtn');
+            if (startBtn) startBtn.style.display = 'none';
+            if (submitBtn) submitBtn.style.display = 'none';
+            
+            const resultContainer = document.querySelector('.result-container');
+            if (resultContainer) {
+                setTimeout(() => {
+                    resultContainer.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }, 500);
+            }
         });
-    });
-    
-    // Initially hide the button
-    backToTopBtn.style.display = 'none';
-});
+        <?php endif; ?>
+
+        // Back to Top functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const backToTopBtn = document.getElementById('backToTop');
+            
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backToTopBtn.style.display = 'flex';
+                    backToTopBtn.style.opacity = '1';
+                } else {
+                    backToTopBtn.style.opacity = '0';
+                    setTimeout(() => {
+                        if (window.pageYOffset <= 300) {
+                            backToTopBtn.style.display = 'none';
+                        }
+                    }, 300);
+                }
+            });
+            
+            backToTopBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            backToTopBtn.style.display = 'none';
+        });
     </script>
 
     <style>
@@ -1117,17 +951,12 @@ document.addEventListener('DOMContentLoaded', function() {
             background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
         }
 
-        .back-to-top:focus {
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.3);
+        .result-option.correct-not-selected {
+            background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
+            border-color: #f59e0b !important;
+            color: #92400e !important;
         }
 
-        /* Loading animation for audio */
-        .audio-player::-webkit-media-controls-panel {
-            background-color: white;
-        }
-
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -1139,20 +968,6 @@ document.addEventListener('DOMContentLoaded', function() {
         ::-webkit-scrollbar-thumb {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
-        }
-
-        .result-option.correct-not-selected {
-            background: linear-gradient(135deg, #fef3c7, #fde68a) !important;
-            border-color: #f59e0b !important;
-            color: #92400e !important;
-        }
-
-        .legend-color.correct-not-selected {
-            background: linear-gradient(135deg, #f59e0b, #fbbf24);
         }
     </style>
 </body>

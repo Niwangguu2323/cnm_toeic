@@ -130,11 +130,6 @@ class ExamContentService {
             $passage_nlp = $this->keywordService->analyzeAndHighlight($content, 'practice');
             $processed_content = nl2br($passage_nlp['highlighted_text']);
             
-            // Thêm study tips nếu có
-            if (!empty($passage_nlp['analysis']['study_tips'])) {
-                $processed_content .= NLPHelper::generateStudyTipsPanel($passage_nlp['analysis']['study_tips']);
-            }
-            
             return $processed_content;
         } else {
             return nl2br(htmlspecialchars($content));
