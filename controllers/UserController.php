@@ -25,7 +25,7 @@ class UserController {
     }
     public function themUser($sql) {
         // Tạo kết nối mới
-        $conn = new ketNoi();
+        $conn = new ketnoi();
 
         // Mở kết nối đến cơ sở dữ liệu
         $con = $conn->moketnoi();
@@ -48,7 +48,7 @@ class UserController {
 
     }
     public function selectUser(){
-            $p=new clsKetNoi();
+            $p=new ketnoi();
             $con=$p->moketnoi();
             if($con){
                 $str="select*from user";
@@ -60,7 +60,7 @@ class UserController {
             }
         }
         public function selectUserbyusername($uname){
-            $p=new clsKetNoi();
+            $p=new ketnoi();
             $con=$p->moketnoi();
             if($con){
                 $str="select*from user where user_name='$uname'";
@@ -72,7 +72,7 @@ class UserController {
             }
         }
         public function selectUserbyEmail($email){
-            $p=new clsKetNoi();
+            $p=new ketnoi();
             $con=$p->moketnoi();
             if($con){
                 $str="select*from user where email='$email'";
