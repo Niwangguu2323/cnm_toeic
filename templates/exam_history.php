@@ -422,7 +422,6 @@ try {
                     </div>
                 </div>
                 <a href="./test.php" class="nav-item nav-link">Làm bài thi</a>
-                <a href="./exam_history.php" class="nav-item nav-link active">Lịch sử</a>
             </div>
             <?php if (isset($_SESSION["user_email"])): ?>
                 <div class="nav-item dropdown me-4">

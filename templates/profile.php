@@ -397,7 +397,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 </div>
                 <a href="./test.php" class="nav-item nav-link">Làm bài thi</a>
-                <a href="./exam-history.php" class="nav-item nav-link">Lịch sử</a>
             </div>
             <?php if (isset($_SESSION["user_email"])): ?>
                 <div class="nav-item dropdown me-4">
@@ -406,7 +405,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </a>
                     <div class="dropdown-menu dropdown-menu-end">
                         <a href="profile.php" class="dropdown-item active"><i class="fas fa-user-edit me-2"></i>Sửa thông tin</a>
-                        <a href="exam-history.php" class="dropdown-item"><i class="fas fa-history me-2"></i>Lịch sử bài thi</a>
+                        <a href="exam_history.php" class="dropdown-item"><i class="fas fa-history me-2"></i>Lịch sử bài thi</a>
                         <a href="logout.php" class="dropdown-item text-danger"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a>
                        <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                         <div class="dropdown-divider"></div>

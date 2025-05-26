@@ -313,8 +313,8 @@ foreach ($questions as $q) {
                     </a>
                     <div class="dropdown-menu dropdown-menu-end">
                         <a href="./profile.php" class="dropdown-item">Sửa thông tin</a>
+                        <a href="exam_history.php" class="dropdown-item"><i class="fas fa-history me-2"></i>Lịch sử bài thi</a>
                         <a href="./logout.php" class="dropdown-item text-danger">Đăng xuất</a>
-                        <a href="./exam_history.php" class="dropdown-item"><i class="fas fa-history me-2"></i>Lịch sử bài thi</a>
                         <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                         <div class="dropdown-divider"></div>
                             <a href="../admin/exam_manage.php" class="dropdown-item">Quản lý bài thi</a>
