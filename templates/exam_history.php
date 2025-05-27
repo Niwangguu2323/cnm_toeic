@@ -583,7 +583,7 @@ try {
                         <div class="d-flex justify-content-between align-items-center">
                             <div class="text-muted">
                                 <i class="fas fa-calendar me-2"></i>
-                                <?= date('d/m/Y H:i', strtotime($exam['time'])) ?>
+                                <?= date('d/m/Y ', strtotime($exam['time'])) ?>
                             </div>
                             <div class="text-muted">
                                 <i class="fas fa-clock me-2"></i>
